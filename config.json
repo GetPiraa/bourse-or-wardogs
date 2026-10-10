@@ -1,0 +1,19 @@
+{
+  "repoUrl": "https://github.com/GetPiraa/bourse-or-wardogs",
+  "apis": {
+    "metaforge": "https://metaforge.app/api/wardogs/market",
+    "wargold": "https://wargold.app/api/market"
+  },
+  "steamAppId": 1867240,
+  "liveStart": [2026, 8, 21],
+  "wipe": [2026, 10, 15],
+  "wipeLabel": { "fr": "Saison 2", "en": "Season 2" },
+  "wipeShort": "S2",
+  "events": [
+    [2026, 8, 21, "B1", "Bêta fermée 1", "Closed beta 1"],
+    [2026, 9, 3, "B2", "Bêta fermée 2", "Closed beta 2"],
+    [2026, 9, 10, "EA", "Accès anticipé", "Early access"],
+    [2026, 9, 30, "0.1.2", "Patch 0.1.2", "Patch 0.1.2"],
+    [2026, 10, 3, "PL", "Plancher 166 000", "Floor 166,000"]
+  ]
+}

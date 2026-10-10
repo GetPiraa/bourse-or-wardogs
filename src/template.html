@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bourse de l'or WARDOGS</title>
+<meta name="description" content="Prix du lingot d'or WARDOGS jour par jour, prix du lendemain dès sa publication, estimations sur 15 jours avec probabilités. WARDOGS gold bar price, tomorrow's price as soon as it is published, 15-day estimates.">
+<meta property="og:title" content="Bourse de l'or WARDOGS · Gold Exchange">
+<meta property="og:description" content="Prix du lingot, prix du lendemain à l'avance, estimations sur 15 jours. Gold bar price, tomorrow's price in advance, 15-day estimates.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#131210">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23131210'/%3E%3Cg transform='rotate(-12 16 16)'%3E%3Crect x='8' y='4.5' width='16' height='23' rx='5' fill='%23e6b63c'/%3E%3Crect x='8' y='4.5' width='16' height='9.5' rx='5' fill='%23f6dc8c' opacity='.5'/%3E%3Ccircle cx='16' cy='9' r='1.9' fill='%23131210'/%3E%3Cpath d='M11 22.5l3.2-3.6 2.6 2.2 4.2-5.6' fill='none' stroke='%23131210' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E">
+<script>
+// Langue : choix mémorisé, sinon #fr / #en dans le lien, sinon langue du navigateur
+(function(){var l=null;try{l=localStorage.getItem('lang')}catch(e){}if(location.hash==='#en')l='en';if(location.hash==='#fr')l='fr';if(l!=='fr'&&l!=='en')l=(navigator.language||'fr').slice(0,2)==='fr'?'fr':'en';document.documentElement.lang=l})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Salle des marchés sombre, une colonne de 1100px ; le graphique est la pièce centrale, les tableaux suivent. Thème unique sombre, choisi pour coller à l'écran du jeu. */
+:root{
+  color-scheme:dark;
+  --bg:#131210; --panel:#1b1a16; --panel2:#23211c; --line:#35322a; --grid:#2a2822;
+  --ink:#f0eadc; --ink2:#b9b2a1; --muted:#8a8475;
+  --gold:#e6b63c; --gold-soft:rgba(230,182,60,.16);
+  --up:#63c283; --down:#e87060; --warn:#e2a23c; --info:#7fb2d9; --fc:#3f8cff; --fcl:#1d5fe0;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.top{position:sticky;top:0;z-index:5;background:rgba(19,18,16,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1500px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between}
+.brand{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:14px;font-weight:600;color:var(--gold)}
+.brandw{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;flex:none}
+.status{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--up);margin-right:6px}
+.lang{display:flex;gap:4px}
+.wrap{max-width:1500px;margin:0 auto;padding-inline:16px;padding-block:28px 40px;display:flex;flex-direction:column;gap:36px}
+h1,h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.02em;margin:0;text-wrap:balance}
+h1{font-size:clamp(34px,7vw,56px);font-weight:700;line-height:1}
+h2{font-size:24px;font-weight:600;color:var(--ink)}
+.eyebrow{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--gold)}
+.sub{color:var(--ink2);max-width:70ch;margin:8px 0 0}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.more{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:22px;margin-bottom:-18px}
+/* Sections repliables : un titre cliquable, le contenu ne s'affiche qu'à la demande */
+details.sec{min-width:0;border:1px solid var(--line);background:var(--panel);margin-top:-24px}
+details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:hover{background:var(--panel2)}
+details.sec>summary h2{font-size:19px}
+details.sec[open]>summary{border-bottom:1px solid var(--line)}
+details.sec>:not(summary){margin:14px 16px}
+details.sec>.tbl{background:var(--bg)}
+.chev{flex:none;width:10px;height:10px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);transition:transform .15s;margin-right:4px}
+details.sec[open] .chev{transform:rotate(-135deg)}
+.note{color:var(--muted);font-size:13px;max-width:80ch;margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.kpi{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi.hot{background:linear-gradient(180deg,rgba(230,182,60,.14),var(--panel))}
+.kpi .l{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1}
+.kpi .d{font-size:12.5px;color:var(--ink2)}
+
+.board{background:var(--panel);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.readout{display:flex;flex-direction:column;gap:2px;min-width:0}
+.readout .date{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--ink2)}
+.readout .price{font-family:var(--display);font-size:40px;font-weight:700;line-height:1;color:var(--gold)}
+.readout .price.est{color:var(--fc)}
+.readout .chg{font-size:13.5px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:4px 14px}
+.ranges{display:flex;flex-wrap:wrap;gap:6px}
+.ranges button,.lang button{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);padding:7px 12px;cursor:pointer}
+.lang button{padding:4px 10px}
+.ranges button:hover,.lang button:hover{color:var(--ink);border-color:var(--muted)}
+.ranges button[aria-pressed="true"],.lang button[aria-pressed="true"]{color:var(--gold);border-color:var(--gold);background:var(--gold-soft)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#chart{position:relative;width:100%;height:clamp(300px,46vw,440px);touch-action:pan-y;cursor:crosshair}
+#chart svg{display:block;width:100%;height:100%}
+#tip{position:absolute;pointer-events:none;background:#0c0b0a;border:1px solid var(--line);padding:8px 10px;font-size:13px;line-height:1.35;white-space:nowrap;z-index:2}
+#tip b{font-family:var(--display);font-size:20px;font-weight:600;color:var(--ink);display:block}
+#tip .t{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted)}
+.legend b{color:var(--ink2);font-weight:600}
+.sw{display:inline-block;width:20px;border-top:2px solid var(--gold);vertical-align:middle;margin-right:6px}
+.sw.f{border-top:3px solid var(--fcl)}
+.grad{display:inline-block;width:54px;height:10px;vertical-align:middle;margin-right:6px;background:linear-gradient(90deg,var(--fc),color-mix(in srgb,var(--fc) 18%,white) 80%,transparent)}
+
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
+.pill{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.pill.hi{color:var(--up)} .pill.mid{color:var(--warn)} .pill.lo{color:var(--down)}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;font-weight:600;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel2);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--grid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(255,255,255,.025)}
+td.r,th.r{text-align:right}
+td.k{font-weight:600;color:var(--ink);white-space:nowrap}
+td.kw{font-weight:600;color:var(--ink);min-width:180px}
+td.p{color:var(--ink2);min-width:230px}
+.scroll{max-height:440px;overflow:auto}
+.scroll th{position:sticky;top:0}
+tr.ev td{background:rgba(230,182,60,.06)}
+.tag{font-size:12px;color:var(--gold)}
+.meter{display:inline-block;height:8px;border-radius:0 4px 4px 0;background:var(--down);vertical-align:middle;margin-right:8px}
+
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.calc>div{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.calc label,.calc .l{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)}
+.calc input{font:600 24px var(--display);color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:6px 10px;width:100%}
+.calc .v{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1}
+.calc .d{font-size:12.5px;color:var(--ink2)}
+.unpin{align-self:flex-start;margin-top:4px;font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold);padding:5px 10px;cursor:pointer}
+
+ol.plan{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;max-width:80ch}
+ol.plan b{color:var(--gold);font-weight:600}
+.src{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px}
+a{color:var(--gold)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .in{max-width:1500px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Grands écrans et ultrawide : on agrandit toute la page au lieu de laisser une colonne minuscule au milieu */
+@media (min-width:1900px){body{zoom:1.1}}
+@media (min-width:2400px){body{zoom:1.2}}
+@media (min-width:3000px){body{zoom:1.3} .wrap,.top .in,footer .in{max-width:1700px}}
+@media (min-width:3800px){body{zoom:1.6}}
+/* Écran large mais peu haut : le graphique ne doit pas remplir tout l'écran */
+@media (min-width:1900px) and (max-height:1500px){#chart{height:400px}}
+/* Tablette */
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+/* Téléphone */
+@media (max-width:640px){
+  body{font-size:14px}
+  .top .in{padding:6px 12px;gap:4px 10px}
+  .brand{font-size:13px;letter-spacing:.08em}
+  .status>span:first-child{display:none}
+  .status{order:3;flex-basis:100%;font-size:12px}
+  .wrap{padding-inline:12px;padding-block:18px 32px;gap:28px}
+  h2{font-size:21px}
+  .sub{font-size:14px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi{padding:10px 12px}
+  .kpi .v{font-size:23px}
+  .kpi.hot{grid-column:1/-1}
+  .kpi.hot~.kpi:last-child:nth-child(even){grid-column:1/-1}
+  .board{padding:10px;gap:10px}
+  .bar{align-items:flex-start}
+  .readout .price{font-size:32px}
+  #chart{height:300px}
+  .ranges{width:100%}
+  .ranges button{flex:1;padding:9px 6px}
+  .legend{font-size:12px;gap:4px 12px}
+  .calc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .calc>div{padding:10px 12px}
+  .calc>div:first-child{grid-column:1/-1}
+  .calc .v{font-size:22px}
+  table{font-size:13px}
+  th,td{padding:8px 10px}
+  td.p{min-width:270px}
+  td.kw{min-width:150px;white-space:normal}
+  /* Première colonne figée pour garder le repère en faisant défiler un tableau large */
+  .tbl th:first-child,.tbl td:first-child{position:sticky;left:0;z-index:1;background:var(--panel);box-shadow:1px 0 0 var(--grid)}
+  .tbl th:first-child{background:var(--panel2);z-index:2}
+  .tbl tr.ev td:first-child{background:#24211a}
+  details.sec>summary{padding:12px}
+  details.sec>:not(summary){margin:10px}
+  details.sec>summary h2{font-size:17px}
+  .scroll{max-height:60vh}
+  /* Tableaux de texte : une carte par ligne plutôt que des colonnes étroites */
+  .tbl.stack thead{display:none}
+  .tbl.stack tr{display:block;padding:10px 12px;border-bottom:1px solid var(--grid)}
+  .tbl.stack tr:last-child{border-bottom:0}
+  .tbl.stack td{display:block;padding:2px 0;border:0;min-width:0}
+  .tbl.stack td:first-child{position:static;box-shadow:none;background:none;white-space:normal}
+  .tbl.stack td:last-child{padding-top:6px}
+  .scroll th:first-child{z-index:3}
+  ol.plan{padding-left:18px}
+}
+@media (max-width:380px){
+  .kpi .v{font-size:20px}
+  .readout .price{font-size:28px}
+  .lang button{padding:4px 8px}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <span class="brandw"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-12 16 16)"><rect x="8" y="4.5" width="16" height="23" rx="5" fill="#e6b63c"/><rect x="8" y="4.5" width="16" height="9.5" rx="5" fill="#f6dc8c" opacity=".5"/><circle cx="16" cy="9" r="1.9" fill="#131210"/><path d="M11 22.5l3.2-3.6 2.6 2.2 4.2-5.6" fill="none" stroke="#131210" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span class="brand" data-t="brand"></span></span>
+  <span class="status"><span><i class="dot"></i><span data-t="auto"></span></span><span id="asof2"></span></span>
+  <span class="lang" role="group" aria-label="Langue / Language"><button type="button" id="lfr">FR</button><button type="button" id="len">EN</button></span>
+</div></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="asof"></div>
+    <h1 data-t="h1"></h1>
+    <p class="sub" data-t="sub"></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2 data-t="h_chart"></h2>
+    <div class="board">
+      <div class="bar">
+        <div class="readout" aria-live="polite">
+          <span class="date" id="rDate"></span>
+          <span class="price num" id="rPrice"></span>
+          <span class="chg num" id="rChg"></span>
+        </div>
+        <div class="ranges" id="ranges" role="group"></div>
+      </div>
+      <div id="chart"><div id="tip" hidden></div></div>
+      <div class="legend" id="legend"></div>
+      <p class="note" data-t="note_chart"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-t="h_sim"></h2>
+    <div class="calc">
+      <div><label for="cash" data-t="sim_cash"></label><input id="cash" class="num" inputmode="numeric" value="5000000"></div>
+      <div><span class="l" id="cSelL"></span><span class="v num" id="cSel"></span><span class="d num" id="cSelD"></span><button type="button" class="unpin" id="unpin" hidden></button></div>
+      <div><span class="l" id="cLowL"></span><span class="v num" id="cLow"></span><span class="d" data-t="sim_best"></span></div>
+      <div><span class="l" data-t="sim_x3"></span><span class="v num" id="cHigh"></span><span class="d num" id="cHighD"></span></div>
+    </div>
+    <p class="note" data-t="note_sim"></p>
+  </section>
+
+  <section>
+    <h2 data-t="h_fc"></h2>
+    <div class="tbl"><table><thead data-th="fc"></thead><tbody id="fcBody"></tbody></table></div>
+    <p class="note" id="bt"></p>
+  </section>
+
+  <section>
+    <h2 data-t="h_reco"></h2>
+    <ol class="plan" id="recos"></ol>
+  </section>
+
+  <div class="more"><span class="eyebrow" data-t="more"></span><span class="ranges"><button type="button" id="openAll" data-t="open_all"></button><button type="button" id="closeAll" data-t="close_all"></button></span></div>
+
+  <details class="sec" data-k="h_jr">
+    <summary><h2 data-t="h_jr"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl scroll"><table><thead data-th="jr"></thead><tbody id="jrBody"></tbody></table></div>
+    <p class="note" data-t="note_jr"></p>
+  </details>
+
+  <details class="sec" data-k="h_mh">
+    <summary><h2 data-t="h_mh"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="mh"></thead><tbody id="mhBody"></tbody></table></div>
+    <p class="note"><span data-t="note_mh"></span> <span id="mdl"></span></p>
+  </details>
+
+  <details class="sec" data-k="h_rules">
+    <summary><h2 data-t="h_rules"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="rules"></thead><tbody id="ruleBody"></tbody></table></div>
+    <p class="note" data-t="note_rules"></p>
+  </details>
+
+  <details class="sec" data-k="h_wd">
+    <summary><h2 data-t="h_wd"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="wd"></thead><tbody id="wdBody"></tbody></table></div>
+    <p class="note" data-t="note_wd"></p>
+  </details>
+
+  <details class="sec" data-k="h_find">
+    <summary><h2 data-t="h_find"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="find"></thead><tbody id="findBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_news">
+    <summary><h2 data-t="h_news"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="news"></thead><tbody id="newsBody"></tbody></table></div>
+    <p class="note" data-t="note_news"></p>
+  </details>
+
+  <details class="sec" data-k="h_day">
+    <summary><h2 data-t="h_day"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl scroll"><table><thead data-th="day"></thead><tbody id="dayBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_src">
+    <summary><h2 data-t="h_src"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="src"></thead><tbody id="srcBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_cmp">
+    <summary><h2 data-t="h_cmp"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="cmp"></thead><tbody id="cmpBody"></tbody></table></div>
+    <p class="note" data-t="note_cmp"></p>
+  </details>
+
+  <details class="sec" data-k="h_links">
+    <summary><h2 data-t="h_links"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="src" id="links"></div>
+  </details>
+</div>
+
+<footer><div class="in"><span data-t="foot"></span><a id="repo" data-t="code"></a></div></footer>
+
+<script>
+/*APP*/
+</script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bourse de l'or WARDOGS</title>
+<meta name="description" content="Prix du lingot d'or WARDOGS jour par jour, prix du lendemain dès sa publication, estimations sur 15 jours avec probabilités. WARDOGS gold bar price, tomorrow's price as soon as it is published, 15-day estimates.">
+<meta property="og:title" content="Bourse de l'or WARDOGS · Gold Exchange">
+<meta property="og:description" content="Prix du lingot, prix du lendemain à l'avance, estimations sur 15 jours. Gold bar price, tomorrow's price in advance, 15-day estimates.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#131210">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23131210'/%3E%3Cg transform='rotate(-12 16 16)'%3E%3Crect x='8' y='4.5' width='16' height='23' rx='5' fill='%23e6b63c'/%3E%3Crect x='8' y='4.5' width='16' height='9.5' rx='5' fill='%23f6dc8c' opacity='.5'/%3E%3Ccircle cx='16' cy='9' r='1.9' fill='%23131210'/%3E%3Cpath d='M11 22.5l3.2-3.6 2.6 2.2 4.2-5.6' fill='none' stroke='%23131210' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E">
+<script>
+// Langue : choix mémorisé, sinon #fr / #en dans le lien, sinon langue du navigateur
+(function(){var l=null;try{l=localStorage.getItem('lang')}catch(e){}if(location.hash==='#en')l='en';if(location.hash==='#fr')l='fr';if(l!=='fr'&&l!=='en')l=(navigator.language||'fr').slice(0,2)==='fr'?'fr':'en';document.documentElement.lang=l})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Salle des marchés sombre, une colonne de 1100px ; le graphique est la pièce centrale, les tableaux suivent. Thème unique sombre, choisi pour coller à l'écran du jeu. */
+:root{
+  color-scheme:dark;
+  --bg:#131210; --panel:#1b1a16; --panel2:#23211c; --line:#35322a; --grid:#2a2822;
+  --ink:#f0eadc; --ink2:#b9b2a1; --muted:#8a8475;
+  --gold:#e6b63c; --gold-soft:rgba(230,182,60,.16);
+  --up:#63c283; --down:#e87060; --warn:#e2a23c; --info:#7fb2d9; --fc:#3f8cff; --fcl:#1d5fe0;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.top{position:sticky;top:0;z-index:5;background:rgba(19,18,16,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1500px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between}
+.brand{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:14px;font-weight:600;color:var(--gold)}
+.brandw{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;flex:none}
+.status{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--up);margin-right:6px}
+.lang{display:flex;gap:4px}
+.wrap{max-width:1500px;margin:0 auto;padding-inline:16px;padding-block:28px 40px;display:flex;flex-direction:column;gap:36px}
+h1,h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.02em;margin:0;text-wrap:balance}
+h1{font-size:clamp(34px,7vw,56px);font-weight:700;line-height:1}
+h2{font-size:24px;font-weight:600;color:var(--ink)}
+.eyebrow{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--gold)}
+.sub{color:var(--ink2);max-width:70ch;margin:8px 0 0}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.more{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:22px;margin-bottom:-18px}
+/* Sections repliables : un titre cliquable, le contenu ne s'affiche qu'à la demande */
+details.sec{min-width:0;border:1px solid var(--line);background:var(--panel);margin-top:-24px}
+details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:hover{background:var(--panel2)}
+details.sec>summary h2{font-size:19px}
+details.sec[open]>summary{border-bottom:1px solid var(--line)}
+details.sec>:not(summary){margin:14px 16px}
+details.sec>.tbl{background:var(--bg)}
+.chev{flex:none;width:10px;height:10px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);transition:transform .15s;margin-right:4px}
+details.sec[open] .chev{transform:rotate(-135deg)}
+.note{color:var(--muted);font-size:13px;max-width:80ch;margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.kpi{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi.hot{background:linear-gradient(180deg,rgba(230,182,60,.14),var(--panel))}
+.kpi .l{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1}
+.kpi .d{font-size:12.5px;color:var(--ink2)}
+
+.board{background:var(--panel);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.readout{display:flex;flex-direction:column;gap:2px;min-width:0}
+.readout .date{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--ink2)}
+.readout .price{font-family:var(--display);font-size:40px;font-weight:700;line-height:1;color:var(--gold)}
+.readout .price.est{color:var(--fc)}
+.readout .chg{font-size:13.5px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:4px 14px}
+.ranges{display:flex;flex-wrap:wrap;gap:6px}
+.ranges button,.lang button{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);padding:7px 12px;cursor:pointer}
+.lang button{padding:4px 10px}
+.ranges button:hover,.lang button:hover{color:var(--ink);border-color:var(--muted)}
+.ranges button[aria-pressed="true"],.lang button[aria-pressed="true"]{color:var(--gold);border-color:var(--gold);background:var(--gold-soft)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#chart{position:relative;width:100%;height:clamp(300px,46vw,440px);touch-action:pan-y;cursor:crosshair}
+#chart svg{display:block;width:100%;height:100%}
+#tip{position:absolute;pointer-events:none;background:#0c0b0a;border:1px solid var(--line);padding:8px 10px;font-size:13px;line-height:1.35;white-space:nowrap;z-index:2}
+#tip b{font-family:var(--display);font-size:20px;font-weight:600;color:var(--ink);display:block}
+#tip .t{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted)}
+.legend b{color:var(--ink2);font-weight:600}
+.sw{display:inline-block;width:20px;border-top:2px solid var(--gold);vertical-align:middle;margin-right:6px}
+.sw.f{border-top:3px solid var(--fcl)}
+.grad{display:inline-block;width:54px;height:10px;vertical-align:middle;margin-right:6px;background:linear-gradient(90deg,var(--fc),color-mix(in srgb,var(--fc) 18%,white) 80%,transparent)}
+
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
+.pill{display:inline-block;font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.pill.hi{color:var(--up)} .pill.mid{color:var(--warn)} .pill.lo{color:var(--down)}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;font-weight:600;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel2);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--grid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(255,255,255,.025)}
+td.r,th.r{text-align:right}
+td.k{font-weight:600;color:var(--ink);white-space:nowrap}
+td.kw{font-weight:600;color:var(--ink);min-width:180px}
+td.p{color:var(--ink2);min-width:230px}
+.scroll{max-height:440px;overflow:auto}
+.scroll th{position:sticky;top:0}
+tr.ev td{background:rgba(230,182,60,.06)}
+.tag{font-size:12px;color:var(--gold)}
+.meter{display:inline-block;height:8px;border-radius:0 4px 4px 0;background:var(--down);vertical-align:middle;margin-right:8px}
+
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.calc>div{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.calc label,.calc .l{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted)}
+.calc input{font:600 24px var(--display);color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:6px 10px;width:100%}
+.calc .v{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1}
+.calc .d{font-size:12.5px;color:var(--ink2)}
+.unpin{align-self:flex-start;margin-top:4px;font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold);padding:5px 10px;cursor:pointer}
+
+ol.plan{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;max-width:80ch}
+ol.plan b{color:var(--gold);font-weight:600}
+.src{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px}
+a{color:var(--gold)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .in{max-width:1500px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Grands écrans et ultrawide : on agrandit toute la page au lieu de laisser une colonne minuscule au milieu */
+@media (min-width:1900px){body{zoom:1.1}}
+@media (min-width:2400px){body{zoom:1.2}}
+@media (min-width:3000px){body{zoom:1.3} .wrap,.top .in,footer .in{max-width:1700px}}
+@media (min-width:3800px){body{zoom:1.6}}
+/* Écran large mais peu haut : le graphique ne doit pas remplir tout l'écran */
+@media (min-width:1900px) and (max-height:1500px){#chart{height:400px}}
+/* Tablette */
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+/* Téléphone */
+@media (max-width:640px){
+  body{font-size:14px}
+  .top .in{padding:6px 12px;gap:4px 10px}
+  .brand{font-size:13px;letter-spacing:.08em}
+  .status>span:first-child{display:none}
+  .status{order:3;flex-basis:100%;font-size:12px}
+  .wrap{padding-inline:12px;padding-block:18px 32px;gap:28px}
+  h2{font-size:21px}
+  .sub{font-size:14px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi{padding:10px 12px}
+  .kpi .v{font-size:23px}
+  .kpi.hot{grid-column:1/-1}
+  .kpi.hot~.kpi:last-child:nth-child(even){grid-column:1/-1}
+  .board{padding:10px;gap:10px}
+  .bar{align-items:flex-start}
+  .readout .price{font-size:32px}
+  #chart{height:300px}
+  .ranges{width:100%}
+  .ranges button{flex:1;padding:9px 6px}
+  .legend{font-size:12px;gap:4px 12px}
+  .calc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .calc>div{padding:10px 12px}
+  .calc>div:first-child{grid-column:1/-1}
+  .calc .v{font-size:22px}
+  table{font-size:13px}
+  th,td{padding:8px 10px}
+  td.p{min-width:270px}
+  td.kw{min-width:150px;white-space:normal}
+  /* Première colonne figée pour garder le repère en faisant défiler un tableau large */
+  .tbl th:first-child,.tbl td:first-child{position:sticky;left:0;z-index:1;background:var(--panel);box-shadow:1px 0 0 var(--grid)}
+  .tbl th:first-child{background:var(--panel2);z-index:2}
+  .tbl tr.ev td:first-child{background:#24211a}
+  details.sec>summary{padding:12px}
+  details.sec>:not(summary){margin:10px}
+  details.sec>summary h2{font-size:17px}
+  .scroll{max-height:60vh}
+  /* Tableaux de texte : une carte par ligne plutôt que des colonnes étroites */
+  .tbl.stack thead{display:none}
+  .tbl.stack tr{display:block;padding:10px 12px;border-bottom:1px solid var(--grid)}
+  .tbl.stack tr:last-child{border-bottom:0}
+  .tbl.stack td{display:block;padding:2px 0;border:0;min-width:0}
+  .tbl.stack td:first-child{position:static;box-shadow:none;background:none;white-space:normal}
+  .tbl.stack td:last-child{padding-top:6px}
+  .scroll th:first-child{z-index:3}
+  ol.plan{padding-left:18px}
+}
+@media (max-width:380px){
+  .kpi .v{font-size:20px}
+  .readout .price{font-size:28px}
+  .lang button{padding:4px 8px}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <span class="brandw"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-12 16 16)"><rect x="8" y="4.5" width="16" height="23" rx="5" fill="#e6b63c"/><rect x="8" y="4.5" width="16" height="9.5" rx="5" fill="#f6dc8c" opacity=".5"/><circle cx="16" cy="9" r="1.9" fill="#131210"/><path d="M11 22.5l3.2-3.6 2.6 2.2 4.2-5.6" fill="none" stroke="#131210" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span class="brand" data-t="brand"></span></span>
+  <span class="status"><span><i class="dot"></i><span data-t="auto"></span></span><span id="asof2"></span></span>
+  <span class="lang" role="group" aria-label="Langue / Language"><button type="button" id="lfr">FR</button><button type="button" id="len">EN</button></span>
+</div></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="asof"></div>
+    <h1 data-t="h1"></h1>
+    <p class="sub" data-t="sub"></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2 data-t="h_chart"></h2>
+    <div class="board">
+      <div class="bar">
+        <div class="readout" aria-live="polite">
+          <span class="date" id="rDate"></span>
+          <span class="price num" id="rPrice"></span>
+          <span class="chg num" id="rChg"></span>
+        </div>
+        <div class="ranges" id="ranges" role="group"></div>
+      </div>
+      <div id="chart"><div id="tip" hidden></div></div>
+      <div class="legend" id="legend"></div>
+      <p class="note" data-t="note_chart"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-t="h_sim"></h2>
+    <div class="calc">
+      <div><label for="cash" data-t="sim_cash"></label><input id="cash" class="num" inputmode="numeric" value="5000000"></div>
+      <div><span class="l" id="cSelL"></span><span class="v num" id="cSel"></span><span class="d num" id="cSelD"></span><button type="button" class="unpin" id="unpin" hidden></button></div>
+      <div><span class="l" id="cLowL"></span><span class="v num" id="cLow"></span><span class="d" data-t="sim_best"></span></div>
+      <div><span class="l" data-t="sim_x3"></span><span class="v num" id="cHigh"></span><span class="d num" id="cHighD"></span></div>
+    </div>
+    <p class="note" data-t="note_sim"></p>
+  </section>
+
+  <section>
+    <h2 data-t="h_fc"></h2>
+    <div class="tbl"><table><thead data-th="fc"></thead><tbody id="fcBody"></tbody></table></div>
+    <p class="note" id="bt"></p>
+  </section>
+
+  <section>
+    <h2 data-t="h_reco"></h2>
+    <ol class="plan" id="recos"></ol>
+  </section>
+
+  <div class="more"><span class="eyebrow" data-t="more"></span><span class="ranges"><button type="button" id="openAll" data-t="open_all"></button><button type="button" id="closeAll" data-t="close_all"></button></span></div>
+
+  <details class="sec" data-k="h_jr">
+    <summary><h2 data-t="h_jr"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl scroll"><table><thead data-th="jr"></thead><tbody id="jrBody"></tbody></table></div>
+    <p class="note" data-t="note_jr"></p>
+  </details>
+
+  <details class="sec" data-k="h_mh">
+    <summary><h2 data-t="h_mh"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="mh"></thead><tbody id="mhBody"></tbody></table></div>
+    <p class="note"><span data-t="note_mh"></span> <span id="mdl"></span></p>
+  </details>
+
+  <details class="sec" data-k="h_rules">
+    <summary><h2 data-t="h_rules"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="rules"></thead><tbody id="ruleBody"></tbody></table></div>
+    <p class="note" data-t="note_rules"></p>
+  </details>
+
+  <details class="sec" data-k="h_wd">
+    <summary><h2 data-t="h_wd"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="wd"></thead><tbody id="wdBody"></tbody></table></div>
+    <p class="note" data-t="note_wd"></p>
+  </details>
+
+  <details class="sec" data-k="h_find">
+    <summary><h2 data-t="h_find"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="find"></thead><tbody id="findBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_news">
+    <summary><h2 data-t="h_news"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl"><table><thead data-th="news"></thead><tbody id="newsBody"></tbody></table></div>
+    <p class="note" data-t="note_news"></p>
+  </details>
+
+  <details class="sec" data-k="h_day">
+    <summary><h2 data-t="h_day"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl scroll"><table><thead data-th="day"></thead><tbody id="dayBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_src">
+    <summary><h2 data-t="h_src"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="src"></thead><tbody id="srcBody"></tbody></table></div>
+  </details>
+
+  <details class="sec" data-k="h_cmp">
+    <summary><h2 data-t="h_cmp"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="tbl stack"><table><thead data-th="cmp"></thead><tbody id="cmpBody"></tbody></table></div>
+    <p class="note" data-t="note_cmp"></p>
+  </details>
+
+  <details class="sec" data-k="h_links">
+    <summary><h2 data-t="h_links"></h2><span class="chev" aria-hidden="true"></span></summary>
+    <div class="src" id="links"></div>
+  </details>
+</div>
+
+<footer><div class="in"><span data-t="foot"></span><a id="repo" data-t="code"></a></div></footer>
+
+<script>
+const RAW=[[20686,703481],[20687,684237],[20688,684237],[20689,632756],[20690,568732],[20691,591529],[20692,482787],[20693,403463],[20694,413826],[20695,413826],[20696,430310],[20697,395571],[20698,416197],[20699,1398240],[20700,1331128],[20701,1278732],[20702,1278732],[20703,1150019],[20704,965537],[20705,802637],[20706,2798240],[20707,2413120],[20708,2303752],[20709,2303752],[20710,2067814],[20711,2113114],[20712,1774565],[20713,1547240],[20714,1470113],[20715,1558250],[20716,1558250],[20717,1672688],[20718,1797600],[20719,1685515],[20720,1691553],[20721,1510085],[20722,1568628],[20723,1568628],[20724,1627740],[20725,1418305],[20726,812640],[20727,694217],[20728,331582],[20729,166000],[20730,166000],[20731,492453],[20732,459112],[20733,326749],[20734,447691],[20735,407388],[20736,272761],[20737,271724]];
+const CFG={"repoUrl":"https://github.com/GetPiraa/bourse-or-wardogs","steamAppId":1867240,"liveStart":[2026,8,21],"wipe":[2026,10,15],"wipeLabel":{"fr":"Saison 2","en":"Season 2"},"wipeShort":"S2","events":[[2026,8,21,"B1","Bêta fermée 1","Closed beta 1"],[2026,9,3,"B2","Bêta fermée 2","Closed beta 2"],[2026,9,10,"EA","Accès anticipé","Early access"],[2026,9,30,"0.1.2","Patch 0.1.2","Patch 0.1.2"],[2026,10,3,"PL","Plancher 166 000","Floor 166,000"]],"updatedAt":1791611058019,"seen":[[1791504000000,1791500709545],[1791590400000,1791514983141],[1791676800000,1791611058019]],"news":[[1791561614000,"WARDOGS | Season 02 Preview"],[1790955572000,"IR Goggles & CIWS Balance Hotfix"],[1790900035000,"WARDOGS | Security & Stability Hotfix"],[1790751426000,"WARDOGS | Update 0.1.2 (Minor Patch) "],[1790446624000,"3 Million Sales + Golden Joystick Awards [VOTE NOW!]"],[1790096018000,"WARDOGS | Season 02 Teaser"],[1789508698000,"2 MILLION COPIES SOLD"],[1789251999000,"SCHEDULED MAINTENANCE & PATCH 0.11"],[1789088725000,"1.25 MILLION COPIES SOLD!"],[1789071633000,"Launch Stability Hotfix #1"]],"fc":[{"t":1791763200000,"q":[166000,166000,168495,220830,228490,243061,247262,262538,278209,279455,292217,304416,412407],"pUp":0.369,"pDown":0.631,"pIn":0.402,"pAbove":0.369,"why":{"fr":"Lundis : 3 hausses, 3 baisses sur 6. Phase : 4 à 7 jours après un saut.","en":"Mondays: 3 up, 3 down out of 6. Phase: 4–7 days after a jump."},"kind":""},{"t":1791849600000,"q":[166000,166000,166000,166000,183710,211005,230330,244742,258764,278863,301622,323761,385413],"pUp":0.44,"pDown":0.519,"pIn":0.282,"pAbove":0.228,"why":{"fr":"Mardis : 2 hausses, 5 baisses sur 7. Phase : plus d’une semaine après un saut.","en":"Tuesdays: 2 up, 5 down out of 7. Phase: more than a week after a jump."},"kind":""},{"t":1791936000000,"q":[166000,166000,166000,166000,168136,183710,203954,228434,249238,270803,308016,370270,460080],"pUp":0.46,"pDown":0.43,"pIn":0.183,"pAbove":0.197,"why":{"fr":"Mercredis : 2 hausses, 5 baisses sur 7. Phase : plus d’une semaine après un saut.","en":"Wednesdays: 2 up, 5 down out of 7. Phase: more than a week after a jump."},"kind":""},{"t":1792022400000,"q":[166000,166000,195160,464540,492453,557687,578727,642392,732395,822980,946028,1110489,1378096],"pUp":0.895,"pDown":0.082,"pIn":0.255,"pAbove":0.842,"why":{"fr":"Jour de lancement : les 3 lancements précédents ont multiplié le prix par 2,8 à 3,5. Le modèle donne 8 chances sur 10 à un saut ; sinon le prix suit sa tendance.","en":"Launch day: the 3 previous launches multiplied the price by 2.8 to 3.5. The model gives a jump 8 chances in 10; otherwise the price follows its trend."},"kind":"jump"},{"t":1792108800000,"q":[166000,166000,187449,308590,432820,495064,541260,595965,680705,792591,934233,1128507,1348013],"pUp":0.416,"pDown":0.557,"pIn":0.214,"pAbove":0.83,"why":{"fr":"Vendredis : 0 hausse, 7 baisses sur 7. Phase : 1 à 3 jours après un saut (si le saut du lancement a lieu).","en":"Fridays: 0 up, 7 down out of 7. Phase: 1–3 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792195200000,"q":[166000,166000,183974,267274,369493,444524,497961,559395,641114,750073,910295,1123264,1340142],"pUp":0.424,"pDown":0.553,"pIn":0.174,"pAbove":0.797,"why":{"fr":"Samedis : 3 hausses, 5 baisses sur 8. Phase : 1 à 3 jours après un saut (si le saut du lancement a lieu).","en":"Saturdays: 3 up, 5 down out of 8. Phase: 1–3 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792281600000,"q":[166000,166000,171331,235988,310003,387714,454439,517309,598073,712551,892392,1109122,1308931],"pUp":0.421,"pDown":0.549,"pIn":0.142,"pAbove":0.752,"why":{"fr":"Dimanches : 0 hausse, 1 baisse sur 8. Phase : 1 à 3 jours après un saut (si le saut du lancement a lieu).","en":"Sundays: 0 up, 1 down out of 8. Phase: 1–3 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792368000000,"q":[166000,166000,168136,212849,272919,342448,410538,480907,557280,645678,827505,1043779,1228783],"pUp":0.412,"pDown":0.554,"pIn":0.108,"pAbove":0.702,"why":{"fr":"Lundis : 3 hausses, 3 baisses sur 6. Phase : 4 à 7 jours après un saut (si le saut du lancement a lieu).","en":"Mondays: 3 up, 3 down out of 6. Phase: 4–7 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792454400000,"q":[166000,166000,166000,189761,243925,305321,368434,441064,515493,602844,778746,989430,1179573],"pUp":0.398,"pDown":0.559,"pIn":0.112,"pAbove":0.653,"why":{"fr":"Mardis : 2 hausses, 5 baisses sur 7. Phase : 4 à 7 jours après un saut (si le saut du lancement a lieu).","en":"Tuesdays: 2 up, 5 down out of 7. Phase: 4–7 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792540800000,"q":[166000,166000,166000,179771,224358,277103,334641,406606,479882,569746,735423,938352,1157698],"pUp":0.403,"pDown":0.541,"pIn":0.104,"pAbove":0.608,"why":{"fr":"Mercredis : 2 hausses, 5 baisses sur 7. Phase : 4 à 7 jours après un saut (si le saut du lancement a lieu).","en":"Wednesdays: 2 up, 5 down out of 7. Phase: 4–7 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792627200000,"q":[166000,166000,166000,175958,207567,253423,308590,376957,455075,539402,689333,904379,1104844],"pUp":0.399,"pDown":0.536,"pIn":0.104,"pAbove":0.563,"why":{"fr":"Jeudis : 2 hausses, 3 baisses sur 5. Phase : 4 à 7 jours après un saut (si le saut du lancement a lieu).","en":"Thursdays: 2 up, 3 down out of 5. Phase: 4–7 days after a jump (if the launch jump happens)."},"kind":""},{"t":1792713600000,"q":[166000,166000,166000,168136,189563,233325,279882,348217,430159,509131,645520,838046,1058698],"pUp":0.454,"pDown":0.478,"pIn":0.098,"pAbove":0.515,"why":{"fr":"Vendredis : 0 hausse, 7 baisses sur 7. Phase : plus d’une semaine après un saut (si le saut du lancement a lieu).","en":"Fridays: 0 up, 7 down out of 7. Phase: more than a week after a jump (if the launch jump happens)."},"kind":""},{"t":1792800000000,"q":[166000,166000,166000,168136,183710,218897,263321,323981,407633,492453,613885,793302,1014510],"pUp":0.47,"pDown":0.455,"pIn":0.109,"pAbove":0.485,"why":{"fr":"Samedis : 3 hausses, 5 baisses sur 8. Phase : plus d’une semaine après un saut (si le saut du lancement a lieu).","en":"Saturdays: 3 up, 5 down out of 8. Phase: more than a week after a jump (if the launch jump happens)."},"kind":""},{"t":1792886400000,"q":[166000,166000,166000,166000,179165,204529,250279,309117,401445,483954,588117,755980,934158],"pUp":0.469,"pDown":0.451,"pIn":0.098,"pAbove":0.46,"why":{"fr":"Dimanches : 0 hausse, 1 baisse sur 8. Phase : plus d’une semaine après un saut (si le saut du lancement a lieu).","en":"Sundays: 0 up, 1 down out of 8. Phase: more than a week after a jump (if the launch jump happens)."},"kind":""},{"t":1792972800000,"q":[166000,166000,166000,166000,176549,199060,242325,298821,383504,469391,578727,716297,902902],"pUp":0.463,"pDown":0.443,"pIn":0.101,"pAbove":0.442,"why":{"fr":"Lundis : 3 hausses, 3 baisses sur 6. Phase : plus d’une semaine après un saut (si le saut du lancement a lieu).","en":"Mondays: 3 up, 3 down out of 6. Phase: more than a week after a jump (if the launch jump happens)."},"kind":""}],"model":{"par":{"wWd":1,"wPh":2,"hl":20,"scale":1.25},"metrics":{"n":36,"loss":0.04655948478365946,"cover80":0.8611111111111112,"dir":0.6944444444444444,"within10":0.5833333333333334}},"journal":[{"t":1791676800000,"actual":271724,"pred":454693,"lo":454693,"hi":454693,"dirOk":false,"live":true,"lect":{"fr":"Surprise : le dimanche a bougé.","en":"Surprise: Sunday moved.","surprise":true}},{"t":1791590400000,"actual":272761,"pred":423078,"lo":321127,"hi":474739,"dirOk":true,"live":true,"lect":{"fr":"Dans la fourchette, mais plus bas que d'habitude (−33,0 %).","en":"Within the range, but lower than usual (−33.0%)."}},{"t":1791504000000,"actual":407388,"pred":417381,"lo":297824,"hi":490002,"dirOk":true,"lect":{"fr":"Conforme aux habitudes (vendredi, −9,0 %).","en":"In line with habits (Friday, −9.0%)."}},{"t":1791417600000,"actual":447691,"pred":304627,"lo":217368,"hi":348718,"dirOk":false,"lect":{"fr":"Surprise à la hausse : +37,0 % alors que 8 cas sur 10 tombaient entre −33,5 % et +6,7 %.","en":"Upside surprise: +37.0% while 8 cases in 10 fell between −33.5% and +6.7%.","surprise":true}},{"t":1791331200000,"actual":326749,"pred":436226,"lo":231809,"hi":488287,"dirOk":true,"lect":{"fr":"Dans la fourchette, mais plus bas que d'habitude (−28,8 %).","en":"Within the range, but lower than usual (−28.8%)."}},{"t":1791244800000,"actual":459112,"pred":470134,"lo":248348,"hi":523125,"dirOk":true,"lect":{"fr":"Conforme aux habitudes (mardi, −6,8 %).","en":"In line with habits (Tuesday, −6.8%)."}},{"t":1791158400000,"actual":492453,"lect":{"fr":"Saut ×2,97 sans lancement ce jour-là (rebond après le plancher).","en":"Jump ×2.97 with no launch that day (rebound off the floor)."}},{"t":1791072000000,"actual":166000,"pred":166000,"lo":166000,"hi":166000,"dirOk":true,"lect":{"fr":"Dimanche figé, comme prévu.","en":"Sunday frozen, as expected."}},{"t":1790985600000,"actual":166000,"pred":316554,"lo":167220,"hi":360774,"dirOk":true,"lect":{"fr":"Surprise à la baisse : −49,9 % alors que 8 cas sur 10 tombaient entre −49,6 % et +8,8 %. Annonce officielle proche : « IR Goggles & CIWS Balance Hotfix ».","en":"Downside surprise: −49.9% while 8 cases in 10 fell between −49.6% and +8.8%. Nearby official announcement: \"IR Goggles & CIWS Balance Hotfix\".","surprise":true}},{"t":1790899200000,"actual":331582,"pred":675226,"lo":561806,"hi":751821,"dirOk":true,"lect":{"fr":"Surprise à la baisse : −52,2 % alors que 8 cas sur 10 tombaient entre −19,1 % et +8,3 %. Annonce officielle proche : « IR Goggles & CIWS Balance Hotfix ».","en":"Downside surprise: −52.2% while 8 cases in 10 fell between −19.1% and +8.3%. Nearby official announcement: \"IR Goggles & CIWS Balance Hotfix\".","surprise":true}},{"t":1790812800000,"actual":694217,"pred":812640,"lo":653098,"hi":873990,"dirOk":true,"lect":{"fr":"Dans la fourchette, mais plus bas que d'habitude (−14,6 %).","en":"Within the range, but lower than usual (−14.6%)."}},{"t":1790726400000,"actual":812640,"pred":1418305,"lo":1193989,"hi":1525379,"dirOk":true,"lect":{"fr":"Surprise à la baisse : −42,7 % alors que 8 cas sur 10 tombaient entre −15,8 % et +7,5 %. Annonce officielle proche : « WARDOGS | Update 0.1.2 (Minor Patch) ».","en":"Downside surprise: −42.7% while 8 cases in 10 fell between −15.8% and +7.5%. Nearby official announcement: \"WARDOGS | Update 0.1.2 (Minor Patch)\".","surprise":true}},{"t":1790640000000,"actual":1418305,"pred":1627740,"lo":1371410,"hi":1778514,"dirOk":false,"lect":{"fr":"Dans la fourchette, mais plus bas que d'habitude (−12,9 %).","en":"Within the range, but lower than usual (−12.9%)."}},{"t":1790553600000,"actual":1627740,"pred":1568628,"lo":1321607,"hi":1713927,"dirOk":false,"lect":{"fr":"Conforme aux habitudes (lundi, +3,8 %).","en":"In line with habits (Monday, +3.8%)."}},{"t":1790467200000,"actual":1568628,"pred":1568628,"lo":1568628,"hi":1568628,"dirOk":true,"lect":{"fr":"Dimanche figé, comme prévu.","en":"Sunday frozen, as expected."}},{"t":1790380800000,"actual":1568628,"pred":1510085,"lo":1254928,"hi":1649961,"dirOk":false,"lect":{"fr":"Conforme aux habitudes (samedi, +3,9 %).","en":"In line with habits (Saturday, +3.9%)."}},{"t":1790294400000,"actual":1510085,"pred":1691553,"lo":1405734,"hi":1848238,"dirOk":true,"lect":{"fr":"Dans la fourchette, mais plus bas que d'habitude (−10,7 %).","en":"Within the range, but lower than usual (−10.7%)."}},{"t":1790208000000,"actual":1691553,"pred":1685515,"lo":1355014,"hi":1841641,"dirOk":false,"lect":{"fr":"Conforme aux habitudes (jeudi, +0,4 %).","en":"In line with habits (Thursday, +0.4%)."}},{"t":1790121600000,"actual":1685515,"pred":1797600,"lo":1445121,"hi":1964108,"dirOk":true,"lect":{"fr":"Conforme aux habitudes (mercredi, −6,2 %).","en":"In line with habits (Wednesday, −6.2%)."}},{"t":1790035200000,"actual":1797600,"pred":1672688,"lo":1344702,"hi":1798966,"dirOk":false,"lect":{"fr":"Dans la fourchette, mais plus haut que d'habitude (+7,5 %).","en":"Within the range, but higher than usual (+7.5%)."}},{"t":1789948800000,"actual":1672688,"pred":1496914,"lo":1265343,"hi":1677221,"dirOk":false,"lect":{"fr":"Dans la fourchette, mais plus haut que d'habitude (+7,3 %).","en":"Within the range, but higher than usual (+7.3%)."}}],"hist":[{"t":1791676800000,"par":{"wWd":1,"wPh":2,"hl":20,"scale":1.25},"n":36,"loss":0.04655948478365946,"cover80":0.8611111111111112,"dir":0.6944444444444444,"within10":0.5833333333333334},{"t":1791590400000,"par":{"wWd":1,"wPh":2,"hl":20,"scale":1.25},"n":35,"loss":0.04686284968996619,"cover80":0.8571428571428571,"dir":0.6857142857142857,"within10":0.5714285714285714},{"t":1791504000000,"par":{"wWd":1,"wPh":2,"hl":20,"scale":1},"n":34,"loss":0.04730237659691712,"cover80":0.7352941176470589,"dir":0.6764705882352942,"within10":0.5882352941176471}]};
+// Tous les textes fixes de la page, en français puis en anglais : [fr, en].
+// Les en-têtes de colonnes commençant par « > » sont alignés à droite.
+const STR = {
+  brand: ["Bourse de l'or · WARDOGS", 'Gold Exchange · WARDOGS'],
+  h1: ["Bourse de l'or", 'Gold Exchange'],
+  sub: ["Suivi du taux cash → lingot de WARDOGS depuis le 21 août 2026, premier jour avec des joueurs. Un prix par jour, en vigueur à minuit UTC, décidé par le studio et publié un peu avant. Bulkhead n'a jamais expliqué comment il le fixe : tout ce qui suit est déduit des données et des fichiers du jeu.",
+    'Tracking the WARDOGS cash → gold bar rate since 21 August 2026, the first day with players. One price per day, effective at midnight UTC, set by the studio and published shortly before. Bulkhead has never explained how it sets it: everything below is inferred from the data and the game files.'],
+  auto: ['Mise à jour automatique chaque soir, dès la sortie du prix du lendemain', "Updates automatically every evening, as soon as tomorrow's price is out"],
+  h_chart: ['Cours du lingot', 'Gold bar price'],
+  lg_actual: ['Prix réel', 'Actual price'],
+  lg_est: ['Estimation (médiane)', 'Estimate (median)'],
+  lg_grad: ['Bleu : probable · pâle : peu probable', 'Blue: likely · pale: unlikely'],
+  note_chart: ["Survole le graphique pour lire un jour, y compris les jours estimés à droite du dernier prix. Clique sur un jour pour l'envoyer au simulateur en dessous : le survol reste libre. Pour l'enlever, reclique dessus, appuie sur Échap ou utilise « Libérer ce jour » dans le simulateur.",
+    'Hover the chart to read a day, including the estimated days to the right of the last price. Click a day to send it to the simulator below: hovering stays free. To remove it, click it again, press Esc or use "Release this day" in the simulator.'],
+  h_sim: ['Simulateur de conversion', 'Conversion simulator'],
+  sim_cash: ['Ton cash', 'Your cash'],
+  sim_best: ['Meilleur cas observé', 'Best case seen so far'],
+  sim_x3: ['Si le prix fait ×3 au wipe', 'If the price triples at the wipe'],
+  note_sim: ["Le simulateur utilise le jour épinglé d'un clic sur le graphique, marqué d'un cercle doré. Sans jour épinglé, il suit le survol, puis revient au dernier prix connu.", 'The simulator uses the day pinned by a click on the chart, marked with a gold ring. With no pinned day, it follows the hover, then falls back to the last known price.'],
+  h_find: ["Constats d'audit", 'Audit findings'],
+  h_wd: ['Comportement par jour de la semaine', 'Behaviour by day of the week'],
+  note_wd: ['Depuis le 21 août, hors jours de saut de plus de +100 %. Peu de semaines de données : les tendances sont nettes mais l\'échantillon reste petit.', 'Since 21 August, excluding jump days above +100%. Only a few weeks of data: the trends are clear but the sample is small.'],
+  h_rules: ['Règles conditionnelles', 'Conditional rules'],
+  note_rules: ["Recalculé à chaque mise à jour, hors jours de saut. Une règle avec 4 à 7 cas reste fragile : plusieurs règles actives qui vont dans le même sens valent plus qu'une seule.",
+    'Recomputed at every update, excluding jump days. A rule with 4 to 7 cases is fragile: several active rules pointing the same way are worth more than one.'],
+  h_fc: ['Estimations sur 15 jours', '15-day estimates'],
+  h_jr: ['Journal des prédictions', 'Prediction log'],
+  note_jr: ["Chaque jour passé est rejoué avec les seules données connues la veille. Les lignes « Prédit en direct » sont les annonces réellement enregistrées avant que le prix sorte. Une « surprise » est un prix sorti de la fourchette 80 % : c'est là que le studio a fait autre chose que d'habitude.",
+    'Each past day is replayed using only the data known the day before. Rows marked "Predicted live" are forecasts actually recorded before the price came out. A "surprise" is a price outside the 80% range: that is where the studio did something unusual.'],
+  h_mh: ['Apprentissage du modèle', 'Model learning'],
+  note_mh: ["À chaque nouveau prix, le modèle rejoue tout le passé avec 36 réglages différents et garde celui qui aurait le mieux prévu, puis élargit ou resserre la fourchette pour qu'elle contienne bien 8 prix sur 10.",
+    'With every new price, the model replays the whole past with 36 different settings and keeps the one that would have predicted best, then widens or narrows the range so that it really contains 8 prices out of 10.'],
+  h_reco: ['Recommandations', 'Recommendations'],
+  h_day: ['Relevé quotidien', 'Daily record'],
+  h_news: ['Annonces officielles', 'Official announcements'],
+  note_news: ["Les sauts de prix tombent sur des lancements annoncés à l'avance. Une nouvelle annonce de bêta, de saison ou de mise à jour majeure est le meilleur signal d'un saut à venir.",
+    'Price jumps land on launches announced in advance. A new beta, season or major update announcement is the best signal of an upcoming jump.'],
+  h_src: ['Sources de données', 'Data sources'],
+  h_cmp: ['Jeux comparables', 'Comparable games'],
+  note_cmp: ["Aucun jeu trouvé ne publie de formule pour un taux à sens unique fixé chaque jour par le studio. Les jetons WoW, PLEX et gemmes s'échangent dans les deux sens.",
+    'No game found publishes a formula for a one-way rate set daily by the studio. WoW tokens, PLEX and gems trade both ways.'],
+  h_links: ['Sources', 'Sources'],
+  more: ["Détails de l'audit · clique sur un titre pour l'ouvrir", 'Audit details · click a title to open it'],
+  open_all: ['Tout déplier', 'Expand all'],
+  close_all: ['Tout replier', 'Collapse all'],
+  foot: ["Projet de fan, sans lien avec Bulkhead ni WARDOGS. Les lingots sont une monnaie de jeu sans valeur réelle. Les estimations sont des tendances statistiques, pas des certitudes.",
+    'Fan project, not affiliated with Bulkhead or WARDOGS. Gold bars are an in-game currency with no real-world value. Estimates are statistical trends, not certainties.'],
+  code: ['Code et données sur GitHub', 'Code and data on GitHub']
+};
+const TH = {
+  find: [['Constat', 'Preuve dans les données', 'Fiabilité'], ['Finding', 'Evidence in the data', 'Confidence']],
+  wd: [['Jour', '>Hausses', '>Stables', '>Baisses', 'Variation moyenne'], ['Day', '>Up', '>Flat', '>Down', 'Average change']],
+  rules: [['Quand…', 'Le jour même', '>Cas', '>Variation médiane', 'Fiabilité', 'Prochain prix'], ['When…', 'That day', '>Cases', '>Median change', 'Reliability', 'Next price']],
+  fc: [['Jour', 'Tendance', '>Estimation', '>8 chances sur 10', '>Extrêmes (95 %)', 'Chance du sens', 'Chance à ±10 %', 'Fondée sur'], ['Day', 'Trend', '>Estimate', '>8 chances in 10', '>Extremes (95%)', 'Direction odds', 'Odds within ±10%', 'Based on']],
+  jr: [['Jour', '>Annoncé la veille', '>8 chances sur 10', '>Prix réel', ">Écart de l'annonce", 'Sens', 'Lecture du mouvement'], ['Day', '>Forecast the day before', '>8 chances in 10', '>Actual price', '>Forecast error', 'Direction', 'Reading of the move']],
+  mh: [["Données jusqu'au", '>Jours rejoués', '>Bon sens', '>Prix à ±10 %', '>Réel dans la fourchette 80 %', 'Réglage retenu'], ['Data up to', '>Days replayed', '>Right direction', '>Price within ±10%', '>Actual inside 80% range', 'Setting kept']],
+  day: [['Date', 'Jour', '>Prix du lingot', '>Vs veille', 'Événement'], ['Date', 'Day', '>Gold bar price', '>Vs previous day', 'Event']],
+  news: [['Date', 'Jour', 'Annonce de Bulkhead sur Steam'], ['Date', 'Day', 'Bulkhead announcement on Steam']],
+  src: [['Donnée', 'Où la trouver', 'Utilité'], ['Data', 'Where to find it', 'Usefulness']],
+  cmp: [['Jeu', 'Comment le prix est fixé', 'Ce que ça apprend pour WARDOGS'], ['Game', 'How the price is set', 'What it teaches for WARDOGS']]
+};
+// [titre, preuve, niveau (hi/mid/lo), libellé]
+const FINDINGS = [
+  [['Le taux est une courbe envoyée par le serveur', 'The rate is a curve sent by the server'], ['Les fichiers du jeu nomment le mécanisme : <i>LiveCurves</i>, des courbes à points-clés (temps, valeur, interpolation) livrées avec les données de jeu du backend. Le client lit le taux sur cette courbe ; il ne le calcule pas.', 'The game files name the mechanism: <i>LiveCurves</i>, keyframed curves (time, value, interpolation) delivered with the backend game data. The client reads the rate off that curve; it does not compute it.'], 'hi', ['Haute', 'High']],
+  [["Le prix du lendemain est publié à l'avance", "Tomorrow's price is published in advance"], ["Le 8 octobre à 23h01 UTC, un tracker public affichait déjà le prix du 9 octobre (451 212), une heure avant son entrée en vigueur. La courbe envoyée par le jeu contient donc le point suivant. L'avance exacte est mesurée au fil des jours.", "On 8 October at 23:01 UTC, a public tracker already showed the 9 October price (451,212), one hour before it took effect. The curve sent by the game therefore contains the next point. The exact lead time is being measured day after day."], 'mid', ['Moyenne', 'Medium']],
+  [['Le prix bouge même serveurs fermés', 'The price moves even with servers closed'], ['La bêta 2 a fermé le dimanche 6 septembre à 08h00 UTC. Sans aucun joueur, le prix a encore fait −10,1 %, −16,0 % et −16,9 % les 7, 8 et 9 septembre.', 'Beta 2 closed on Sunday 6 September at 08:00 UTC. With no players at all, the price still moved −10.1%, −16.0% and −16.9% on 7, 8 and 9 September.'], 'hi', ['Haute', 'High']],
+  [['Les achats des joueurs ne font pas bouger le prix', 'Player purchases do not move the price'], ["L'achat est une simple demande d'échange au serveur, et le prix varie sans joueurs. Le nombre d'achats par jour n'est publié nulle part, et il ne servirait à rien.", 'A purchase is a plain exchange request to the server, and the price varies without players. The number of purchases per day is published nowhere, and it would be useless anyway.'], 'hi', ['Haute', 'High']],
+  [['Le dimanche ne bouge jamais', 'Sunday never moves'], ['Tous les dimanches observés sont identiques au samedi, au dollar près.', 'Every Sunday observed is identical to Saturday, to the dollar.'], 'hi', ['Très haute', 'Very high']],
+  [['Le vendredi baisse souvent, pas toujours', 'Friday often drops, not always'], ['6 vendredis sur 7 en baisse hors jour de lancement. Le 9 octobre a fait +0,8 % alors que trois règles annonçaient une baisse : les habitudes du studio ne sont pas des lois.', '6 Fridays out of 7 down, excluding launch day. 9 October did +0.8% while three rules called a drop: the studio\'s habits are not laws.'], 'mid', ['Moyenne', 'Medium']],
+  [['Chaque lancement triple le prix', 'Every launch triples the price'], ['×2,80 le 21 août, ×3,36 le 3 septembre, ×3,49 le 10 septembre par rapport à la veille.', '×2.80 on 21 August, ×3.36 on 3 September, ×3.49 on 10 September versus the day before.'], 'hi', ['Haute', 'High']],
+  [["Le prix s'érode après un lancement", 'The price erodes after a launch'], ['703k → 396k en 11 jours, 1,40M → 803k en 6 jours, 2,80M → 1,42M en 19 jours.', '703k → 396k in 11 days, 1.40M → 803k in 6 days, 2.80M → 1.42M in 19 days.'], 'hi', ['Haute', 'High']],
+  [["La veille d'un lancement est un creux", 'The eve of a launch is a low'], ['251k, 416k et 803k : au plus bas ou tout près du plus bas de chaque vague.', '251k, 416k and 803k: at or right next to the low of each wave.'], 'mid', ['Moyenne', 'Medium']],
+  [['Les ouvertures sont posées à la main', 'Opening prices are set by hand'], ["703 481, puis 1 398 240, puis 2 798 240 : l'écart entre les deux dernières vaut exactement 1 400 000.", '703,481, then 1,398,240, then 2,798,240: the gap between the last two is exactly 1,400,000.'], 'hi', ['Haute', 'High']],
+  [['166 000 est un plancher', '166,000 is a floor'], ['Chiffre rond tenu deux jours. La moitié du prix de la veille aurait donné 165 791, juste en dessous.', 'A round number held for two days. Half of the previous price would have been 165,791, just below.'], 'mid', ['Moyenne', 'Medium']],
+  [["L'historique avant le 21 août est factice", 'The history before 21 August is synthetic'], ["Des centaines de jours entre 268k et 356k, ±0,5 % par jour, alors que le jeu n'était pas ouvert. Il est écarté de cette page.", 'Hundreds of days between 268k and 356k, ±0.5% a day, while the game was not open. It is left out of this page.'], 'hi', ['Haute', 'High']],
+  [["Le lendemain d'un saut baisse", 'The day after a jump drops'], ['4 fois sur 4, y compris après le rebond du 5 octobre (médiane −5 %).', '4 times out of 4, including after the 5 October rebound (median −5%).'], 'hi', ['Haute', 'High']],
+  [['Une vague finit vers 55 % de son ouverture', 'A wave ends at about 55% of its opening'], ["0,59 pour la bêta 1, 0,57 pour la bêta 2, 0,51 pour l'accès anticipé avant le krach.", '0.59 for beta 1, 0.57 for beta 2, 0.51 for early access before the crash.'], 'mid', ['Moyenne', 'Medium']],
+  [["Aucun lien avec l'or réel ni les marchés", 'No link with real gold or the markets'], ['Or, argent, bitcoin, S&amp;P 500 testés avec 0 à 3 jours de décalage : même sens que le lingot environ une fois sur deux, corrélations entre −0,14 et 0,27.', 'Gold, silver, bitcoin and the S&amp;P 500 tested with 0 to 3 days of lag: same direction as the bar about half the time, correlations between −0.14 and 0.27.'], 'hi', ['Haute', 'High']],
+  [['Le nombre de joueurs ne prédit pas le lendemain', 'Player count does not predict the next day'], ["Du 18 septembre au 8 octobre, prix et joueurs Steam baissent ensemble (corrélation 0,71 sur les niveaux), mais leurs variations d'un jour à l'autre ne sont pas liées (0,07).", 'From 18 September to 8 October, price and Steam players fall together (0.71 correlation on levels), but their day-to-day changes are unrelated (0.07).'], 'mid', ['Moyenne', 'Medium']],
+  [['Lien avec le cash en circulation', 'Link with cash in circulation'], ['Théorie de joueurs. Le krach de −77 % a commencé la veille du patch 0.1.2, pas après.', 'A player theory. The −77% crash began the day before patch 0.1.2, not after.'], 'lo', ['Non prouvé', 'Unproven']]
+];
+const RECOS = [
+  [['Chaque soir, regarde le prix du lendemain avant de décider.', "Every evening, check tomorrow's price before deciding."], ["Il apparaît ici avant minuit UTC. S'il est plus haut, convertis ce soir ; s'il est plus bas, attends. C'est la seule information certaine, tout le reste est une tendance.", 'It shows up here before midnight UTC. If it is higher, convert tonight; if it is lower, wait. It is the only certain information; everything else is a trend.']],
+  [['La veille du wipe, vérifie le prix du jour de lancement.', 'On the eve of the wipe, check the launch-day price.'], ["S'il saute comme aux trois lancements précédents, convertis avant minuit UTC. Le cash est effacé au wipe de toute façon.", 'If it jumps like the three previous launches, convert before midnight UTC. Cash is wiped anyway.']],
+  [['Sous 350 000, convertis sans attendre mieux.', 'Below 350,000, convert without waiting for better.'], ["C'est le bas absolu de l'historique ; le plancher connu est 166 000.", 'That is the very bottom of the history; the known floor is 166,000.']],
+  [['Samedi, tu connais dimanche.', 'On Saturday, you know Sunday.'], ['Le prix ne bouge pas le dimanche : 48 heures au même taux.', 'The price does not move on Sunday: 48 hours at the same rate.']]
+];
+const DATASRC = [
+  [['Prix du jour et du lendemain', "Today's and tomorrow's price"], ['Deux trackers publics qui relaient la courbe du jeu : MetaForge et WarGold. La mise à jour les fusionne et signale tout écart.', 'Two public trackers relaying the game curve: MetaForge and WarGold. The update merges them and flags any mismatch.'], 'hi', ['Décisive', 'Decisive']],
+  [['Annonces et maintenances', 'Announcements and maintenance'], ['Flux officiel des actualités Steam du jeu, relevé à chaque mise à jour.', 'The official Steam news feed of the game, read at every update.'], 'hi', ['Forte', 'Strong']],
+  [["Réécritures de l'historique", 'History rewrites'], ["Chaque état des données est archivé dans l'historique Git ; tout prix passé modifié est signalé.", 'Every state of the data is archived in the Git history; any modified past price is flagged.'], 'mid', ['Moyenne', 'Medium']],
+  [['Joueurs connectés', 'Players online'], ['API publique Steam et SteamCharts.', 'Public Steam API and SteamCharts.'], 'lo', ['Faible', 'Weak']],
+  [['Achats de lingots par jour, cash en circulation', 'Gold bars bought per day, cash in circulation'], ["Publié nulle part. Ces chiffres n'existent que sur les serveurs de Bulkhead.", 'Published nowhere. These figures only exist on Bulkhead servers.'], 'lo', ['Inaccessible', 'Unavailable']]
+];
+const COMPARE = [
+  [['Animal Crossing, navets', 'Animal Crossing, turnips'], ["Script du jeu : quatre motifs hebdomadaires et une table de transition d'une semaine à l'autre. Décodé par les joueurs, il est devenu prévisible.", 'Game script: four weekly patterns and a transition table from one week to the next. Decoded by players, it became predictable.'], ["Un prix scripté se lit par régimes (saut, puis érosion), pas comme un cours de bourse. C'est le cas le plus proche.", 'A scripted price is read in regimes (jump, then erosion), not like a stock price. It is the closest case.']],
+  [['Escape from Tarkov, bitcoin', 'Escape from Tarkov, bitcoin'], ['Calé sur le cours réel du bitcoin, rafraîchi une fois par jour, avec un coefficient que le studio modifie quand il veut.', 'Pegged to the real bitcoin price, refreshed once a day, with a coefficient the studio changes whenever it wants.'], ['Le studio peut changer les paramètres sans prévenir : le krach du 30 septembre et le rebond du 5 octobre y ressemblent.', 'The studio can change parameters without warning: the 30 September crash and the 5 October rebound look like that.']],
+  [['WoW, jeton', 'WoW Token'], ["Formule du studio, pas d'enchères. Pics courts aux annonces et aux extensions.", 'Studio formula, no auction. Short spikes at announcements and expansions.'], ['Les sorties de contenu font monter le prix, puis il retombe.', 'Content releases push the price up, then it falls back.']],
+  [['EVE Online, PLEX', 'EVE Online, PLEX'], ['Vrai marché entre joueurs. −43,5 % entre mai 2019 et mai 2020, attribué à la lutte contre les bots.', 'A real player market. −43.5% between May 2019 and May 2020, attributed to the fight against bots.'], ['Une purge de tricheurs peut faire chuter un prix, mais ici la chute a commencé avant le patch.', 'A cheater purge can crash a price, but here the drop started before the patch.']],
+  [['GTA Online, BAWSAQ', 'GTA Online, BAWSAQ'], ["Agrège l'activité des joueurs côté serveur. Algorithme jamais documenté.", 'Aggregates player activity server-side. Algorithm never documented.'], ['Un prix piloté par serveur reste opaque : seules les régularités observées sont exploitables.', 'A server-driven price stays opaque: only observed regularities can be used.']],
+  [['Guild Wars 2, gemmes', 'Guild Wars 2, gems'], ['Deux réserves (or et gemmes), 15 % de frais, échange dans les deux sens.', 'Two pools (gold and gems), 15% fee, two-way exchange.'], ["Non transposable : WARDOGS n'a pas de revente, donc pas de vendeur pour faire le prix.", 'Not transferable: WARDOGS has no resale, so no seller to make the price.']]
+];
+const LINKS = [
+  ['MetaForge', 'https://metaforge.app/wardogs/market'], ['WarGold', 'https://wargold.app/'], ['Steam news', 'https://store.steampowered.com/news/app/1867240'],
+  ['WardogsHub', 'https://wardogshub.gg/gold-market/'], ['AllThings.How', 'https://allthings.how/wardogs-gold-bars-explained-the-gold-exchange-and-season-resets/'],
+  ['SteamCharts', 'https://steamcharts.com/app/1867240'], ['Nookipedia', 'https://nookipedia.com/wiki/Stalk_Market'], ['Tarkov wiki', 'https://escapefromtarkov.fandom.com/wiki/Physical_Bitcoin'],
+  ['WoW Token', 'https://worldofwarcraft.blizzard.com/en-us/news/18141101/introducing-the-wow-token'], ['EVE forum', 'https://forums.eveonline.com/t/q1-2020-economy-review/251541'], ['GW2 wiki', 'https://wiki.guildwars2.com/wiki/Currency_exchange']
+];
+
+// RAW (points [jour epoch, prix]) et CFG (config + résultats du modèle) sont injectés par build.js ; les textes viennent de content.js.
+const LI=document.documentElement.lang==='en'?1:0, LANG=LI?'en':'fr', L=(fr,en)=>LI?en:fr, LOC=LI?'en-GB':'fr-FR', PS=LI?'%':' %';
+const DAY=864e5, D=RAW.map(([d,p])=>({t:d*DAY,p}));
+const U=a=>Date.UTC(a[0],a[1]-1,a[2]);
+const N=D.length, WIPE=U(CFG.wipe), WL=CFG.wipeLabel[LANG];
+const EV={};CFG.events.forEach(e=>EV[U(e)]=[e[3],e[4+LI]]);EV[WIPE]=[CFG.wipeShort,'Wipe '+WL];
+const WD=LI?['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const num=n=>LI?Math.round(n).toLocaleString('en-US'):Math.round(n).toLocaleString('fr-FR').replace(/[  ]/g,' ');
+const dec=(v,d=1)=>LI?v.toFixed(d):v.toFixed(d).replace('.',',');
+const fmt=n=>'$'+num(n);
+const short=n=>n>=1e6?'$'+dec(n/1e6,2)+'M':'$'+Math.round(n/1e3)+'k';
+const dfmt=(t,o)=>new Date(t).toLocaleDateString(LOC,Object.assign({timeZone:'UTC'},o));
+const pct=(a,b)=>(a/b-1)*100;
+const sgn=v=>(v>0?'+':v<0?'−':'')+dec(Math.abs(v))+PS;
+const pc=v=>Math.round(v*100)+PS;
+const chg=v=>{const c=v>0?'up':v<0?'down':'flat',s=v>0?'▲ ':v<0?'▼ ':'■ ';return `<span class="${c}">${s}${sgn(v)}</span>`};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const last=D[N-1], FLOOR=Math.min(...D.map(x=>x.p));
+const dow=t=>new Date(t).getUTCDay();
+// Le dernier point peut être le prix de demain, publié avant minuit UTC par les données du jeu
+const TODAY=Math.floor(Date.now()/DAY)*DAY, AHEAD=last.t>TODAY;
+
+// Textes fixes, en-têtes de tableaux, langue
+document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=STR[e.dataset.t][LI]);
+document.querySelectorAll('[data-th]').forEach(e=>e.innerHTML='<tr>'+TH[e.dataset.th][LI].map(h=>h[0]==='>'?`<th class="r">${h.slice(1)}</th>`:`<th>${h}</th>`).join('')+'</tr>');
+document.title=L("Bourse de l'or WARDOGS",'WARDOGS Gold Exchange');
+[['lfr','fr'],['len','en']].forEach(([id,l])=>{$(id).setAttribute('aria-pressed',l===LANG);$(id).addEventListener('click',()=>{if(l===LANG)return;try{localStorage.setItem('lang',l)}catch(e){}history.replaceState(null,'',location.pathname+location.search);location.reload()})});
+$('repo').href=CFG.repoUrl;
+
+// Sections repliables : fermées par défaut, l'état est mémorisé dans le navigateur
+(function(){
+  const secs=[...document.querySelectorAll('details.sec')];
+  let open=[];try{open=JSON.parse(localStorage.getItem('open')||'[]')}catch(e){}
+  const save=()=>{try{localStorage.setItem('open',JSON.stringify(secs.filter(d=>d.open).map(d=>d.dataset.k)))}catch(e){}};
+  secs.forEach(d=>{d.open=open.includes(d.dataset.k);d.addEventListener('toggle',save)});
+  $('openAll').addEventListener('click',()=>secs.forEach(d=>d.open=true));
+  $('closeAll').addEventListener('click',()=>secs.forEach(d=>d.open=false));
+})();
+
+// Variations par jour de semaine, hors sauts de lancement (> ×2)
+const wdR=WD.map(()=>[]);
+for(let i=1;i<N;i++){const r=D[i].p/D[i-1].p;if(r<=2)wdR[dow(D[i].t)].push(r)}
+const q=(a,f)=>{const s=[...a].sort((x,y)=>x-y),k=(s.length-1)*f,l=Math.floor(k);return s[l]+(s[Math.min(l+1,s.length-1)]-s[l])*(k-l)};
+
+// Estimations : calculées par model.js à chaque mise à jour (4000 trajectoires simulées).
+// f.q = quantiles 2,5 / 5 / 10 / 20 / 30 / 40 / 50 / 60 / 70 / 80 / 90 / 95 / 97,5 %
+const F=(CFG.fc||[]).map(f=>({...f,p:f.q[6],lo:f.q[0],hi:f.q[12],q10:f.q[2],q90:f.q[10]}));
+const P=i=>i<N?D[i]:F[i-N];
+
+const longDate={day:'numeric',month:'long',year:'numeric'};
+$('asof').textContent=L('Audit de marché · WARDOGS · ','Market audit · WARDOGS · ')+(AHEAD?L('prix connu jusqu’au ','price known up to '):L('arrêté au ','as of '))+dfmt(last.t,longDate);
+$('asof2').textContent=L('Dernière donnée reçue le ','Last data received ')+new Date(CFG.updatedAt).toLocaleString(LOC,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+// KPIs
+(function(){
+  const mn=D.reduce((a,b)=>b.p<a.p?b:a), mx=D.reduce((a,b)=>b.p>a.p?b:a), wipe=Math.round((WIPE-TODAY)/DAY), dm={day:'numeric',month:'long'};
+  const k=[[AHEAD?L('Prix de demain · déjà publié',"Tomorrow's price · already published"):L('Dernier prix','Latest price'),fmt(last.p),dfmt(last.t,dm)+' · '+chg(pct(last.p,D[N-2].p))+L(' vs veille',' vs previous day'),AHEAD],
+    [AHEAD?L('Estimation du jour suivant','Estimate for the day after'):L('Estimation demain',"Tomorrow's estimate"),'≈ '+fmt(F[0].p),short(F[0].q10)+' – '+short(F[0].q90)+' · '+pc(F[0].pIn)+L(' à ±10 %',' within ±10%')],
+    [L('Sur 7 jours','Over 7 days'),chg(pct(last.p,D[N-8].p)),L('depuis ','from ')+fmt(D[N-8].p)],
+    [L('Plus bas','Lowest'),fmt(mn.p),dfmt(mn.t,dm)],
+    [L('Plus haut','Highest'),fmt(mx.p),dfmt(mx.t,dm)],
+    ['Wipe '+WL,wipe>0?L('J−','D−')+wipe:L('Passé','Past'),dfmt(WIPE,{weekday:'long',day:'numeric',month:'long'})]];
+  $('kpis').innerHTML=k.map(x=>`<div class="kpi${x[3]?' hot':''}"><span class="l">${x[0]}</span><span class="v num">${x[1]}</span><span class="d num">${x[2]}</span></div>`).join('');
+})();
+
+// Graphique
+const RANGES=[[L('1 sem.','1 wk'),7],[L('4 sem.','4 wks'),28]].concat(N>84?[[L('12 sem.','12 wks'),84]]:[],[[L('Tout','All'),N]]);
+let range=RANGES.length-1, hover=null, pin=null, G={};
+const chart=$('chart'), tip=$('tip');
+$('ranges').innerHTML=RANGES.map((r,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===range}">${r[0]}</button>`).join('');
+$('ranges').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;range=+b.dataset.i;hover=null;[...$('ranges').children].forEach((c,i)=>c.setAttribute('aria-pressed',i===range));draw()});
+$('legend').innerHTML=`<span><i class="sw"></i>${STR.lg_actual[LI]}</span><span><i class="sw f"></i>${STR.lg_est[LI]}</span><span><i class="grad"></i>${STR.lg_grad[LI]}</span>`+Object.values(EV).map(e=>`<span><b>${e[0]}</b> ${e[1]}</span>`).join('');
+function nice(v){const p=Math.pow(10,Math.floor(Math.log10(v))),m=v/p;return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p}
+function draw(){
+  const W=chart.clientWidth,H=chart.clientHeight,small=W<520,m={l:4,r:small?46:58,t:22,b:26};
+  if(W<120||H<120)return; // pas encore mis en page (onglet masqué) : l'observateur de taille relancera le dessin
+  const n=Math.min(N,RANGES[range][1]), i0=N-n, pts=D.slice(i0).concat(F), nT=pts.length;
+  const lo=Math.min(...pts.map(x=>x.lo||x.p)), hi=Math.max(...pts.map(x=>x.hi||x.p));
+  const st=nice((hi-lo||hi)/4), y0=Math.floor(lo/st)*st, y1=Math.max(Math.ceil(hi/st)*st,y0+st);
+  const X=i=>m.l+(i/(nT-1))*(W-m.l-m.r), Y=p=>m.t+(1-(p-y0)/(y1-y0))*(H-m.t-m.b);
+  G={W,H,m,n,nT,i0,X,Y};
+  const T=`font-size="${small?11:12}" font-family="var(--body)"`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${L("Prix du lingot d'or par jour, avec estimations",'Gold bar price per day, with estimates')}"><defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--gold)" stop-opacity=".28"/><stop offset="1" stop-color="var(--gold)" stop-opacity="0"/></linearGradient></defs>`;
+  for(let v=y0;v<=y1+1;v+=st){const y=Y(v);s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="${W-m.r+8}" y="${y+4}" fill="var(--muted)" ${T}>${short(v)}</text>`}
+  const nt=Math.max(2,Math.min(6,Math.floor((W-m.l-m.r)/(small?90:110))));
+  for(let k=0;k<nt;k++){const i=Math.round(k*(nT-1)/(nt-1)),a=k===0?'start':k===nt-1?'end':'middle';s+=`<text x="${X(i)}" y="${H-6}" text-anchor="${a}" fill="var(--muted)" ${T}>${dfmt(pts[i].t,nT>200?{month:'short',year:'2-digit'}:{day:'numeric',month:'short'})}</text>`}
+  // Zone des estimations : fond légèrement distinct à droite du dernier prix
+  if(F.length)s+=`<rect x="${X(n-1)}" y="${m.t}" width="${X(nT-1)-X(n-1)}" height="${H-m.t-m.b}" fill="var(--fc)" fill-opacity=".035"/>`;
+  pts.forEach((p,i)=>{const e=EV[p.t];if(!e)return;const x=X(i);s+=`<line x1="${x}" x2="${x}" y1="${m.t}" y2="${H-m.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 4"/>`;if(nT<=130&&!(small&&nT>45))s+=`<text x="${x}" y="13" text-anchor="middle" fill="var(--ink2)" font-size="12" font-weight="600" font-family="var(--display)">${e[0]}</text>`});
+  const xy=(i,v)=>X(i).toFixed(1)+' '+Y(v).toFixed(1);
+  const path=D.slice(i0).map((p,i)=>(i?'L':'M')+xy(i,p.p)).join('');
+  s+=`<path d="${path}L${X(n-1)} ${H-m.b}L${X(0)} ${H-m.b}Z" fill="url(#ar)" stroke="none"/>`;
+  if(F.length){
+    // Éventail de probabilité : six bandes empilées, du presque blanc (bords, peu probable) au bleu plein (centre, probable)
+    const a=`M${xy(n-1,last.p)}`;
+    [[0,12],[1,11],[2,10],[3,9],[4,8],[5,7]].forEach(([l,h],b)=>{
+      s+=`<path d="${a}${F.map((f,k)=>'L'+xy(n+k,f.q[h])).join('')}${F.map((f,k)=>'L'+xy(n+k,f.q[l])).reverse().join('')}Z" fill="color-mix(in srgb, var(--fc) ${18+b*16}%, white)" fill-opacity="${(.08+b*.07).toFixed(2)}" stroke="none"/>`});
+    // Ligne d'estimation : trait plein bleu, sans contour
+    const fp=`${a}${F.map((f,k)=>'L'+xy(n+k,f.p)).join('')}`;
+    s+=`<path d="${fp}" fill="none" stroke="var(--fcl)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  s+=`<path d="${path}" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  s+=`<circle cx="${X(n-1)}" cy="${Y(last.p)}" r="4.5" fill="var(--gold)" stroke="var(--panel)" stroke-width="2"/>`;
+  s+=`<g id="pinm" visibility="hidden"><line id="pl" y1="${m.t}" y2="${H-m.b}" stroke="var(--gold)" stroke-opacity=".55" stroke-width="1"/><circle id="pd" r="7" fill="none" stroke="var(--gold)" stroke-width="2"/></g>`;
+  s+=`<g id="cross" visibility="hidden"><line id="cl" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink2)" stroke-width="1" stroke-dasharray="4 4"/><circle id="cd" r="5" fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/></g></svg>`;
+  chart.querySelector('svg')?.remove(); chart.insertAdjacentHTML('afterbegin',s);
+  mark();
+}
+// Le survol pilote la lecture (point mobile, bandeau) ; un clic épingle un jour pour le simulateur, sans bloquer le survol
+function sel(){return hover!=null?hover:pin!=null?pin:N-1}
+function calcSel(){return pin!=null?pin:hover!=null?hover:N-1}
+const range80=d=>L(`8 chances sur 10 entre ${fmt(d.q10)} et ${fmt(d.q90)}`,`8 chances in 10 between ${fmt(d.q10)} and ${fmt(d.q90)}`);
+function mark(){
+  if(!G.X)return calc();
+  const gi=sel(), d=P(gi), prev=P(gi-1), isF=gi>=N, est=L(' · estimation',' · estimate'), vs=L(' vs veille',' vs previous day');
+  $('rDate').textContent=dfmt(d.t,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(isF?est:'')+(gi===pin?L(' · épinglé',' · pinned'):'');
+  $('rPrice').textContent=(isF?'≈ ':'')+fmt(d.p);
+  $('rPrice').classList.toggle('est',isF);
+  const tag=(EV[d.t]?`<span class="tag">${EV[d.t][1]}</span>`:'')+(gi===N-1&&AHEAD?`<span class="tag">${L('Publié à l’avance, en vigueur à minuit UTC','Published in advance, effective at midnight UTC')}</span>`:'');
+  $('rChg').innerHTML=isF?`<span>${range80(d)}</span><span>${pc(d.pIn)}${L(' de chances d’être à ±10 %',' odds of being within ±10%')}</span><span>${chg(pct(d.p,last.p))}${L(' vs dernier prix',' vs latest price')}</span>${tag}`
+    :(prev?`<span>${chg(pct(d.p,prev.p))}${vs}</span>`:'')+(gi!==N-1?`<span>${L('Dernier prix : ','Latest price: ')}${chg(pct(last.p,d.p))}${L(' par rapport à ce jour',' compared with that day')}</span>`:'')+tag;
+  const cross=chart.querySelector('#cross'), li=gi-G.i0, show=hover!=null&&li>=0;
+  if(cross){cross.setAttribute('visibility',show?'visible':'hidden');
+    if(show){const x=G.X(li),y=G.Y(d.p),cl=chart.querySelector('#cl'),cd=chart.querySelector('#cd');cl.setAttribute('x1',x);cl.setAttribute('x2',x);cd.setAttribute('cx',x);cd.setAttribute('cy',y);
+      tip.hidden=false;
+      tip.innerHTML=`<span class="t">${dfmt(d.t,{weekday:'short',day:'numeric',month:'short'})}${isF?est:''}</span><b class="num">${isF?'≈ ':''}${fmt(d.p)}</b>`+(isF?`${short(d.q10)} – ${short(d.q90)} ${L('(8 chances sur 10)','(8 chances in 10)')}<br>±10${PS} : ${pc(d.pIn)}`:prev?chg(pct(d.p,prev.p))+vs:'');
+      const tw=tip.offsetWidth,th=tip.offsetHeight;let tx=x+12;if(tx+tw>G.W-4)tx=x-12-tw;tip.style.left=Math.max(4,tx)+'px';tip.style.top=Math.max(4,Math.min(G.H-th-30,y-th-10))+'px';
+    }else tip.hidden=true}
+  // Repère fixe du jour épinglé
+  const pm=chart.querySelector('#pinm'), pli=pin!=null?pin-G.i0:-1;
+  if(pm){pm.setAttribute('visibility',pli>=0?'visible':'hidden');
+    if(pli>=0){const px=G.X(pli),py=G.Y(P(pin).p),pl=chart.querySelector('#pl'),pd=chart.querySelector('#pd');pl.setAttribute('x1',px);pl.setAttribute('x2',px);pd.setAttribute('cx',px);pd.setAttribute('cy',py)}}
+  calc();
+}
+// Position rapportée à la largeur affichée : reste juste quand la page est agrandie (zoom des grands écrans)
+function idxAt(e){const r=chart.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*G.W,f=(x-G.m.l)/(G.W-G.m.l-G.m.r);return G.i0+Math.max(0,Math.min(G.nT-1,Math.round(f*(G.nT-1))))}
+chart.addEventListener('pointermove',e=>{hover=idxAt(e);mark()});
+chart.addEventListener('pointerleave',()=>{hover=null;mark()});
+chart.addEventListener('click',e=>{const i=idxAt(e);pin=pin===i?null:i;mark()});
+if(window.ResizeObserver)new ResizeObserver(()=>draw()).observe(chart);else addEventListener('resize',draw);
+
+// Simulateur
+function calc(){
+  const cash=parseInt($('cash').value.replace(/\D/g,''))||0, gi=calcSel(), d=P(gi), dm={day:'numeric',month:'long'};
+  const b=p=>Math.floor(cash/p), txt=n=>num(n)+(LI?(n===1?' bar':' bars'):(n>1?' lingots':' lingot')), per=L(' le lingot',' per bar');
+  $('cSelL').textContent=(gi===N-1?L('Au dernier prix','At the latest price'):(gi>=N?L('Estimation du ','Estimate for '):L('Au ','On '))+dfmt(d.t,dm))+(pin!=null?L(' · épinglé',' · pinned'):'');
+  $('unpin').hidden=pin==null;
+  $('cSel').textContent=txt(b(d.p)); $('cSelD').textContent=L('à ','at ')+(gi>=N?'≈ ':'')+fmt(d.p)+per;
+  $('cLowL').textContent=L('Au plancher (','At the floor (')+num(FLOOR)+')';
+  $('cLow').textContent=txt(b(FLOOR));
+  $('cHigh').textContent=txt(b(last.p*3)); $('cHighD').textContent=L('à ','at ')+fmt(last.p*3)+per;
+}
+$('cash').value=num(5e6);
+$('unpin').textContent=L('✕ Libérer ce jour','✕ Release this day');
+$('unpin').addEventListener('click',()=>{pin=null;mark()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&pin!=null){pin=null;mark()}});
+$('cash').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v?num(+v):'';calc()});
+
+// Jours de la semaine
+(function(){
+  const avg=a=>a.length?(Math.exp(a.reduce((s,r)=>s+Math.log(r),0)/a.length)-1)*100:0, mxa=Math.max(...wdR.map(a=>Math.abs(avg(a))))||1;
+  $('wdBody').innerHTML=[1,2,3,4,5,6,0].map(i=>{const a=wdR[i],v=avg(a);return `<tr><td class="k">${WD[i]}</td><td class="r num">${a.filter(r=>r>1).length}</td><td class="r num">${a.filter(r=>r===1).length}</td><td class="r num">${a.filter(r=>r<1).length}</td><td class="num"><span class="meter" style="width:${Math.round(Math.abs(v)/mxa*90)}px"></span>${chg(v)}</td></tr>`}).join('');
+})();
+
+// Estimations, journal, apprentissage
+(function(){
+  const cls=(v,hi,mid)=>v>=hi?'hi':v>=mid?'mid':'lo', sp=(c,t)=>`<span class="${c}">${t}</span>`;
+  $('fcBody').innerHTML=F.map(f=>{const flat=Math.max(0,1-f.pUp-f.pDown),big=Math.max(f.pUp,f.pDown,flat);
+    const lab=f.kind==='flat'?sp('flat',L('■ Identique à samedi','■ Same as Saturday')):f.kind==='jump'?sp('up',L('▲ Saut de lancement','▲ Launch jump')):big<.6?sp('flat',L('◆ Indécis','◆ Undecided')):f.pUp>f.pDown?sp('up',L('▲ Hausse','▲ Up')):sp('down',L('▼ Baisse','▼ Down'));
+    return `<tr${f.t===WIPE?' class="ev"':''}><td class="k">${dfmt(f.t,{weekday:'short',day:'numeric',month:'short'})}${f.t===WIPE?' · '+WL:''}</td><td>${lab}</td><td class="r num">≈ ${fmt(f.p)}</td><td class="r num">${short(f.q10)} – ${short(f.q90)}</td><td class="r num">${short(f.lo)} – ${short(f.hi)}</td><td><span class="pill ${cls(big,.75,.6)}">${pc(big)}</span></td><td><span class="pill ${cls(f.pIn,.5,.3)}">${pc(f.pIn)}</span></td><td class="p">${f.why[LANG]}</td></tr>`}).join('');
+  const m=CFG.model.metrics,p=CFG.model.par,sc=x=>dec(x.scale,2).replace(/[.,]?0+$/,'');
+  const par=x=>L(`jour de semaine ×${x.wWd}, phase après saut ×${x.wPh}, mémoire ${x.hl?x.hl+' jours':'complète'}, fourchette ×${sc(x)}`,`weekday ×${x.wWd}, phase after jump ×${x.wPh}, memory ${x.hl?x.hl+' days':'full'}, range ×${sc(x)}`);
+  $('bt').textContent=L(`« Chance du sens » : part des 4000 trajectoires simulées qui vont dans le sens annoncé. « Chance à ±10 % » : part qui finit à moins de 10 % de l'estimation. Rejoué sur ${m.n} jours passés avec les seules données de la veille, le modèle a donné le bon sens ${pc(m.dir)} du temps, un prix à ±10 % ${pc(m.within10)} du temps, et le prix réel est tombé dans la fourchette 80 % ${pc(m.cover80)} du temps. Plus l'horizon est loin, plus l'incertitude se cumule.`,
+    `"Direction odds": share of the 4,000 simulated paths that go the announced way. "Odds within ±10%": share that end within 10% of the estimate. Replayed over ${m.n} past days using only the previous day's data, the model got the direction right ${pc(m.dir)} of the time, the price within ±10% ${pc(m.within10)} of the time, and the actual price fell inside the 80% range ${pc(m.cover80)} of the time. The further the horizon, the more uncertainty builds up.`);
+  $('jrBody').innerHTML=(CFG.journal||[]).map(j=>`<tr><td class="k num">${dfmt(j.t,{weekday:'short',day:'2-digit',month:'2-digit'})}</td><td class="r num">${j.pred?'≈ '+fmt(j.pred):'—'}</td><td class="r num">${j.pred?short(j.lo)+' – '+short(j.hi):'—'}</td><td class="r num">${fmt(j.actual)}</td><td class="r num">${j.pred?sgn((j.pred/j.actual-1)*100):'—'}</td><td>${j.pred?(j.dirOk?sp('up',L('✓ Bon sens','✓ Right')):sp('down',L('✗ Mauvais sens','✗ Wrong'))):'—'}</td><td class="p">${esc(j.lect[LANG])}${j.live?' '+sp('tag',L('Prédit en direct','Predicted live')):''}</td></tr>`).join('');
+  $('mhBody').innerHTML=(CFG.hist||[]).map(h=>`<tr><td class="k num">${dfmt(h.t,{day:'2-digit',month:'2-digit',year:'numeric'})}</td><td class="r num">${h.n}</td><td class="r num">${pc(h.dir)}</td><td class="r num">${pc(h.within10)}</td><td class="r num">${pc(h.cover80)}</td><td class="p">${par(h.par)}</td></tr>`).join('');
+  $('mdl').textContent=L('Réglage actuel : ','Current setting: ')+par(p)+'.';
+})();
+
+// Règles conditionnelles : pour chaque règle, ce qui s'est passé quand la condition était vraie, et si elle s'applique au prochain prix
+(function(){
+  const ctx=i=>{ // i = indice du jour à prévoir (N = prochain prix inconnu)
+    const t=i<N?D[i].t:last.t+DAY, wd=dow(t), r1=D[i-1].p/D[i-2].p, w=D.slice(Math.max(0,i-8),i-1).map(x=>x.p);
+    let since=i; // le premier jour de la série est lui-même un lancement
+    for(let j=i-1;j>=1;j--)if(D[j].p/D[j-1].p>2){since=i-j;break}
+    return{wd,r1,since,week:wd>=1&&wd<=5,low7:w.length>0&&D[i-1].p<=Math.min(...w)};
+  };
+  const R=[[L('Dimanche','Sunday'),c=>c.wd===0],[L('Vendredi','Friday'),c=>c.wd===5],[L('Mardi','Tuesday'),c=>c.wd===2],[L('Mercredi','Wednesday'),c=>c.wd===3],
+    [L('Lendemain d’un saut (prix plus que doublé)','Day after a jump (price more than doubled)'),c=>c.r1>2],
+    [L('Jour de semaine après une hausse','Weekday after a rise'),c=>c.week&&c.r1>1&&c.r1<=2],
+    [L('4 à 7 jours après un saut','4 to 7 days after a jump'),c=>c.since>=4&&c.since<=7],
+    [L('1 à 3 jours après un saut','1 to 3 days after a jump'),c=>c.since>=1&&c.since<=3],
+    [L('Jour de semaine après un plus-bas de 7 jours','Weekday after a 7-day low'),c=>c.week&&c.low7],
+    [L('Samedi après un plus-bas de 7 jours','Saturday after a 7-day low'),c=>c.wd===6&&c.low7]];
+  const tom=ctx(N);
+  const out=R.map(([name,f])=>{let n=0,up=0,dn=0;const rs=[];
+    for(let i=2;i<N;i++){const r=D[i].p/D[i-1].p;if(r>2||!f(ctx(i)))continue;n++;rs.push(r);r>1?up++:r<1&&dn++}
+    const fl=n-up-dn,best=Math.max(up,dn,fl);
+    return{name,n,best,res:best===fl?`<span class="flat">${L('■ Stable','■ Flat')}</span>`:best===dn?`<span class="down">${L('▼ Baisse','▼ Down')}</span>`:`<span class="up">${L('▲ Hausse','▲ Up')}</span>`,med:n?q(rs,.5):1,on:f(tom)}})
+    .filter(o=>o.n>=4).sort((a,b)=>b.on-a.on||b.best/b.n-a.best/a.n||b.n-a.n);
+  $('ruleBody').innerHTML=out.map(o=>{const s=o.best/o.n;return `<tr${o.on?' class="ev"':''}><td class="k">${o.name}</td><td>${o.res}</td><td class="r num">${o.best}${L(' sur ',' of ')}${o.n}</td><td class="r num">${sgn((o.med-1)*100)}</td><td><span class="pill ${s>=.85?'hi':s>=.7?'mid':'lo'}">${pc(s)}</span></td><td>${o.on?`<span class="tag">${L('● Active pour le prochain prix','● Active for the next price')}</span>`:'<span class="flat">—</span>'}</td></tr>`}).join('');
+})();
+
+// Tableaux de textes (content.js)
+const row3=(r,kc)=>`<tr><td class="${kc}">${r[0][LI]}</td><td class="p">${r[1][LI]}</td>`;
+$('findBody').innerHTML=FINDINGS.map(r=>row3(r,'kw')+`<td><span class="pill ${r[2]}">${r[3][LI]}</span></td></tr>`).join('');
+$('srcBody').innerHTML=DATASRC.map(r=>row3(r,'kw')+`<td><span class="pill ${r[2]}">${r[3][LI]}</span></td></tr>`).join('');
+$('cmpBody').innerHTML=COMPARE.map(r=>row3(r,'kw')+`<td class="p">${r[2][LI]}</td></tr>`).join('');
+$('recos').innerHTML=RECOS.map(r=>`<li><b>${r[0][LI]}</b> ${r[1][LI]}</li>`).join('');
+$('links').innerHTML=LINKS.map(l=>`<a href="${l[1]}" rel="noopener">${l[0]}</a>`).join('');
+
+// Annonces officielles Steam
+$('newsBody').innerHTML=(CFG.news||[]).map(n=>`<tr><td class="k num">${dfmt(n[0],{day:'2-digit',month:'2-digit',year:'numeric'})}</td><td>${WD[dow(n[0])]}</td><td class="p">${esc(n[1])}</td></tr>`).join('')||`<tr><td colspan="3" class="p">${L('Annonces indisponibles lors de cette mise à jour.','Announcements unavailable at this update.')}</td></tr>`;
+
+// Relevé quotidien
+(function(){
+  let h='';
+  for(let i=N-1;i>=0;i--){const d=D[i],e=EV[d.t];h+=`<tr${e?' class="ev"':''}><td class="k num">${dfmt(d.t,{day:'2-digit',month:'2-digit',year:'numeric'})}</td><td>${WD[dow(d.t)]}</td><td class="r num">${fmt(d.p)}</td><td class="r num">${i?chg(pct(d.p,D[i-1].p)):'—'}</td><td>${e?`<span class="tag">${e[1]}</span>`:''}</td></tr>`}
+  $('dayBody').innerHTML=h;
+})();
+draw();
+
+</script>
+</body>
+</html>

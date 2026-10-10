@@ -1,0 +1,43 @@
+name: Mise à jour du prix de l'or
+
+on:
+  schedule:
+    # Le prix du lendemain apparaît en soirée, avant minuit UTC (vu à 23h01 UTC).
+    # Toutes les 30 minutes de 20h à minuit UTC, un passage de rattrapage à 00h15, et un à midi pour les annonces.
+    - cron: '7,37 20-23 * * *'
+    - cron: '15 0,12 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['src/**', 'build.js', 'model.js', 'config.json', '.github/workflows/update.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Récupérer les données et reconstruire la page
+        run: node build.js
+      - name: Publier s'il y a du nouveau
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Rien de nouveau."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "data: mise à jour automatique du prix"
+            git pull --rebase --autostash
+            git push
+          fi
