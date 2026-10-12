@@ -39,7 +39,7 @@ if (!offline) {
       }
     } catch (e) { report.sources[name] = 'ÉCHEC : ' + String(e.message).split('\n')[0]; }
   }
-  if (Object.values(report.sources).every(s => s.startsWith('ÉCHEC'))) { console.error('Aucune source de prix joignable : rien reconstruit. ' + JSON.stringify(report.sources)); process.exit(old.length ? 0 : 1); }
+  if (Object.values(report.sources).every(s => s.startsWith('ÉCHEC'))) { console.error('Aucune source de prix joignable : rien reconstruit. ' + JSON.stringify(report.sources)); process.exit(1); }
   points = [...merged].filter(([t]) => t <= today0).sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price }));
   // Toute valeur qui change entre deux relevés pour un même jour est notée : c'est ce qui montre qu'une valeur était provisoire.
   for (const p of points) if (oldMap.has(p.t) && oldMap.get(p.t) !== p.price) revisions.push({ t: p.t, from: oldMap.get(p.t), to: p.price, at: now });

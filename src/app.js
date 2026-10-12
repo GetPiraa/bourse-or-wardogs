@@ -53,6 +53,15 @@ const longDate={day:'numeric',month:'long',year:'numeric'};
 $('asof').textContent=L('Audit de marché · WARDOGS · ','Market audit · WARDOGS · ')+L('dernier prix confirmé le ','last confirmed price on ')+dfmt(last.t,longDate);
 $('asof2').textContent=L('Dernier changement relevé le ','Last change recorded ')+new Date(CFG.updatedAt).toLocaleString(LOC,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 
+// Alerte de retard : passé 13h UTC, le prix du jour devrait être confirmé. S'il manque, la page le dit au lieu de laisser croire qu'elle est à jour.
+(function(){
+  const h=new Date().getUTCHours(), late=TODAY-last.t>DAY||(TODAY>last.t&&h>=13);
+  if(!late)return;
+  $('stale').hidden=false;
+  $('stale').textContent=L('Attention, le prix du jour n\u2019a pas été relevé. Dernier prix confirmé : ','Warning, today\u2019s price has not been recorded. Last confirmed price: ')+dfmt(last.t,longDate)+L('. Vérifie le prix en jeu avant de convertir.','. Check the price in the game before converting.');
+  document.querySelector('.dot')?.classList.add('late');
+})();
+
 // KPIs
 (function(){
   const mn=D.reduce((a,b)=>b.p<a.p?b:a), mx=D.reduce((a,b)=>b.p>a.p?b:a), wipe=Math.round((WIPE-TODAY)/DAY), dm={day:'numeric',month:'long'};

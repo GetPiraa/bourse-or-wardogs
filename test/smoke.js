@@ -12,7 +12,7 @@ for (const lang of ['fr', 'en']) {
     addEventListener() {}, setAttribute() {}, classList: { toggle() {} }, remove() {}, querySelector(s) { return s === 'svg' ? null : mk(s); }, insertAdjacentHTML(p, s) { this.svg = s; }, getBoundingClientRect() { return { left: 0, width: 900 }; } });
   const tEls = [...h.matchAll(/data-t="([^"]+)"/g)].map(m => Object.assign(mk('t:' + m[1]), { dataset: { t: m[1] } }));
   const thEls = [...h.matchAll(/data-th="([^"]+)"/g)].map(m => Object.assign(mk('th:' + m[1]), { dataset: { th: m[1] } }));
-  global.document = { documentElement: { lang }, title: '', getElementById: id => els[id] || (els[id] = mk(id)), querySelectorAll: s => s === '[data-t]' ? tEls : s === '[data-th]' ? thEls : [] };
+  global.document = { documentElement: { lang }, title: '', getElementById: id => els[id] || (els[id] = mk(id)), querySelector: () => null, querySelectorAll: s => s === '[data-t]' ? tEls : s === '[data-th]' ? thEls : [] };
   global.addEventListener = () => {}; global.window = {}; global.localStorage = { setItem() {}, getItem() { return null; } }; global.location = { pathname: '/', search: '', reload() {} }; global.history = { replaceState() {} };
   try {
     new Function(js + ';hover=N+3;mark();hover=0;mark();range=0;draw();hover=null;mark();')();

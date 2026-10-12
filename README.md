@@ -6,7 +6,7 @@
 
 Suivi du taux cash → lingot d'or du jeu WARDOGS : prix confirmé jour par jour, valeur du jour signalée comme provisoire tant qu'elle peut changer, estimations sur 15 jours avec leurs probabilités, journal des prédictions.
 
-- **Mise à jour automatique** par GitHub Actions (`.github/workflows/update.yml`) : un relevé par heure de 0h à 12h UTC, puis un à 18h. Un prix est tenu pour confirmé s'il a été relevé en jeu (`data/manual.json`), ou à partir de 12h UTC le jour même. Sans nouvelle donnée, rien n'est modifié.
+- **Mise à jour automatique** par GitHub Actions (`.github/workflows/update.yml`) : un relevé par heure. Si la source est injoignable, le passage échoue et GitHub prévient le propriétaire. Si le prix du jour manque après 13h UTC, la page affiche une alerte. Un prix est tenu pour confirmé s'il a été relevé en jeu (`data/manual.json`), ou à partir de 12h UTC le jour même. Sans nouvelle donnée, rien n'est modifié.
 - **Sources** : les relevés faits en jeu, le relevé public MetaForge pour le prix du jour, et le flux d'actualités Steam du jeu. Aucun appel aux serveurs du jeu. Le modèle et tous les calculs sont ceux de ce dépôt.
 - **Modèle** (`model.js`) : chaque variation passée est un exemple, pondéré selon sa ressemblance avec le jour à prévoir (jour de semaine, phase après un saut, ancienneté). À chaque nouveau prix, le modèle rejoue le passé avec 36 réglages, garde le meilleur, puis simule 4000 trajectoires. Sa précision mesurée est affichée sur la page.
 
@@ -24,7 +24,7 @@ Lancer en local : `node build.js` puis ouvrir `index.html`.
 
 Tracker for the WARDOGS cash → gold bar rate: confirmed daily price, today's value flagged as provisional while it can still change, 15-day estimates with probabilities, and a prediction log.
 
-- **Updates automatically** through GitHub Actions: one reading per hour from 00:00 to 12:00 UTC, then one at 18:00. A price is treated as confirmed once it has been read in the game (`data/manual.json`), or from 12:00 UTC on its own day. Nothing changes when there is no new data.
+- **Updates automatically** through GitHub Actions: one reading per hour. If the source is unreachable the run fails and GitHub notifies the owner. If the day's price is missing after 13:00 UTC, the page shows a warning. A price is treated as confirmed once it has been read in the game (`data/manual.json`), or from 12:00 UTC on its own day. Nothing changes when there is no new data.
 - **Sources**: readings taken in the game, the public MetaForge reading for the day's price, and the game's Steam news feed. No calls to the game servers. The model and all calculations are this repository's own.
 - **Model** (`model.js`): each past move is an example, weighted by how much it resembles the day to predict (weekday, phase after a jump, age). With every new price the model replays the past with 36 settings, keeps the best, then simulates 4,000 paths. Its measured accuracy is shown on the page.
 

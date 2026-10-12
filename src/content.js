@@ -5,7 +5,7 @@ const STR = {
   h1: ["Bourse de l'or", 'Gold Exchange'],
   sub: ["Suivi du taux cash contre lingot de WARDOGS depuis le 21 août 2026, premier jour avec des joueurs. Le studio décide d'un prix par jour. Les 11 et 12 octobre, ce prix a été fixé dans la matinée (heure UTC), et la valeur visible avant était provisoire. Bulkhead n'a jamais expliqué son calcul : ce qui suit est déduit des données et des fichiers du jeu.",
     'Tracking the WARDOGS cash to gold bar rate since 21 August 2026, the first day with players. The studio sets one price per day. On 11 and 12 October that price was set during the morning (UTC), and the value visible before was provisional. Bulkhead has never explained its calculation: what follows is inferred from the data and the game files.'],
-  auto: ['Relevé automatique chaque heure de 0h à 12h UTC, puis à 18h', 'Checked automatically every hour from 00:00 to 12:00 UTC, then at 18:00'],
+  auto: ['Relevé automatique toutes les heures', 'Checked automatically every hour'],
   h_chart: ['Cours du lingot', 'Gold bar price'],
   lg_actual: ['Prix réel', 'Actual price'],
   lg_est: ['Estimation (médiane)', 'Estimate (median)'],

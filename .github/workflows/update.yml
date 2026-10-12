@@ -2,9 +2,9 @@ name: Mise à jour du prix de l'or
 
 on:
   schedule:
-    # Le prix du jour est fixé dans la matinée UTC (constaté les 11 et 12 octobre 2026) ; avant, la valeur est provisoire.
-    # Un relevé par heure de 0h à 12h UTC pour voir à quelle heure il change, puis un à 18h.
-    - cron: '15 0-12,18 * * *'
+    # Un relevé par heure, toute la journée. Le prix du jour se fixe dans la matinée UTC, mais une valeur peut encore
+    # être corrigée ensuite : chaque passage relit tout et rattrape un passage manqué ou retardé par GitHub.
+    - cron: '15 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
