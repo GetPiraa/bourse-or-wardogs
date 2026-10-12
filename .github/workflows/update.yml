@@ -3,8 +3,9 @@ name: Mise à jour du prix de l'or
 on:
   schedule:
     # L'heure à laquelle le studio fixe le prix du jour n'est pas connue (entre 00h37 et 09h25 UTC le 12 octobre 2026).
-    # Un passage toutes les 5 minutes, jour et nuit, pour ne rater aucune heure. La source garde son relevé 5 minutes en cache.
-    - cron: '*/5 * * * *'
+    # La source relit le jeu une fois par heure, à la minute 25 (vérifié le 12 octobre à 09h25 et 10h25 UTC), et garde
+    # son relevé 5 minutes en cache : deux passages par heure, à la minute 27 et à la minute 32, jour et nuit.
+    - cron: '27,32 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
