@@ -72,7 +72,7 @@ $('asof2').textContent=L('Dernier changement relevé le ','Last change recorded 
     [L('Plus haut','Highest'),fmt(mx.p),dfmt(mx.t,dm)],
     ['Wipe '+WL,wipe>0?L('J−','D−')+wipe:L('Passé','Past'),dfmt(WIPE,{weekday:'long',day:'numeric',month:'long'})]];
   // Valeur du jour encore provisoire : affichée à part, jamais mêlée aux prix confirmés
-  if(PT)k.splice(1,0,[L('Valeur du jour · provisoire',"Today's value · provisional"),fmt(PT.p),L('relevée à ','read at ')+new Date(CFG.updatedAt).toLocaleTimeString(LOC,{timeZone:'UTC',hour:'2-digit',minute:'2-digit'})+' UTC'+L(' · peut changer jusqu\u2019à 12h UTC',' · may change until 12:00 UTC'),true]);
+  if(PT)k.splice(1,0,[L('Valeur du jour · provisoire',"Today's value · provisional"),fmt(PT.p),L('relevée à ','read at ')+new Date(CFG.updatedAt).toLocaleTimeString(LOC,{timeZone:'UTC',hour:'2-digit',minute:'2-digit'})+' UTC'+L(' · en attente du prix du matin',' · waiting for the morning price'),true]);
   $('kpis').innerHTML=k.map(x=>`<div class="kpi${x[3]?' hot':''}"><span class="l">${x[0]}</span><span class="v num">${x[1]}</span><span class="d num">${x[2]}</span></div>`).join('');
 })();
 
