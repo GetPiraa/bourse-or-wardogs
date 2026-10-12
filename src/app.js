@@ -18,7 +18,8 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const last=D[N-1], FLOOR=Math.min(...D.map(x=>x.p));
 const dow=t=>new Date(t).getUTCDay();
-// D ne contient que des prix confirmés. PROV = valeurs provisoires des trackers (jour en cours avant 12h UTC, lendemain).
+// D ne contient que des prix confirmés. PROV = valeur du jour encore provisoire (avant 12h UTC, sans relevé en jeu).
+const MAN=new Set((CFG.manual||[]).map(d=>d*DAY));
 const TODAY=Math.floor(Date.now()/DAY)*DAY, PROV=(CFG.prov||[]).map(([t,p])=>({t,p})), PT=PROV.find(x=>x.t===TODAY);
 
 // Textes fixes, en-têtes de tableaux, langue
@@ -55,7 +56,7 @@ $('asof2').textContent=L('Dernier changement relevé le ','Last change recorded 
 // KPIs
 (function(){
   const mn=D.reduce((a,b)=>b.p<a.p?b:a), mx=D.reduce((a,b)=>b.p>a.p?b:a), wipe=Math.round((WIPE-TODAY)/DAY), dm={day:'numeric',month:'long'};
-  const k=[[L('Dernier prix confirmé','Latest confirmed price'),fmt(last.p),dfmt(last.t,dm)+' · '+chg(pct(last.p,D[N-2].p))+L(' vs veille',' vs previous day')],
+  const k=[[L('Dernier prix confirmé','Latest confirmed price')+(MAN.has(last.t)?L(' · relevé en jeu',' · read in game'):''),fmt(last.p),dfmt(last.t,dm)+' · '+chg(pct(last.p,D[N-2].p))+L(' vs veille',' vs previous day')],
     [L('Estimation du ','Estimate for ')+dfmt(F[0].t,{day:'numeric',month:'short'}),'≈ '+fmt(F[0].p),short(F[0].q10)+' – '+short(F[0].q90)+' · '+pc(F[0].pIn)+L(' à ±10 %',' within ±10%')],
     [L('Sur 7 jours','Over 7 days'),chg(pct(last.p,D[N-8].p)),L('depuis ','from ')+fmt(D[N-8].p)],
     [L('Plus bas','Lowest'),fmt(mn.p),dfmt(mn.t,dm)],

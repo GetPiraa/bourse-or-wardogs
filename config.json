@@ -1,8 +1,7 @@
 {
   "repoUrl": "https://github.com/GetPiraa/bourse-or-wardogs",
   "apis": {
-    "metaforge": "https://metaforge.app/api/wardogs/market",
-    "wargold": "https://wargold.app/api/market"
+    "metaforge": "https://metaforge.app/api/wardogs/market"
   },
   "steamAppId": 1867240,
   "confirmHourUTC": 12,

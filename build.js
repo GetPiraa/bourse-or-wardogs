@@ -1,5 +1,5 @@
 // Usage : node build.js [sortie.html] [--offline]
-// Télécharge l'historique du lingot WARDOGS (trackers publics) et les annonces officielles Steam, règle le modèle,
+// Lit les relevés faits en jeu (data/manual.json), télécharge le relevé public du prix et les annonces officielles Steam, règle le modèle,
 // simule 15 jours, tient le journal des prédictions et assemble la page (index.html par défaut).
 // Sources publiques uniquement : aucun appel aux serveurs du jeu.
 // Le résultat est déterministe : sans nouvelle donnée, aucun fichier ne change (donc aucun commit inutile).
@@ -14,15 +14,18 @@ const DAY = 864e5, now = Date.now(), iso = t => new Date(t).toISOString().slice(
 const old = readJson(D_('gold.json'), { points: [] }).points, seen = readJson(D_('firstSeen.json'), {}), state = readJson(D_('state.json'), {});
 let news = readJson(D_('news.json'), []);
 const revisions = readJson(D_('revisions.json'), []);
+// Relevés faits à la main dans le jeu : { "AAAA-MM-JJ": prix }. Ils priment sur tout le reste et sont confirmés d'office.
+const manual = new Map(Object.entries(readJson(D_('manual.json'), {})).map(([d, p]) => [Date.parse(d + 'T00:00:00Z'), p]));
+const today0 = Math.floor(now / DAY) * DAY;
 const oldNews = JSON.stringify(news);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36';
 const get = url => JSON.parse(execFileSync('curl', ['-sS', '--fail', '--max-time', '30', '-A', UA, url], { encoding: 'utf8' }));
 
-let points = old;
+let points = old.filter(p => p.t <= today0);
 const report = { sources: {}, ecartsEntreSources: [], reecritures: [], nouveaux: [] };
 if (!offline) {
-  // 1. Prix : fusion des sources. Elles donnent aussi une valeur pour le jour en cours et le lendemain, provisoire.
+  // 1. Prix : relevé public du jour (provisoire avant 12h UTC). Aucune valeur future n'est gardée.
   const merged = new Map(old.map(p => [p.t, p.price])), oldMap = new Map(merged);
   for (const [name, url] of Object.entries(cfg.apis)) {
     try {
@@ -37,7 +40,7 @@ if (!offline) {
     } catch (e) { report.sources[name] = 'ÉCHEC : ' + String(e.message).split('\n')[0]; }
   }
   if (Object.values(report.sources).every(s => s.startsWith('ÉCHEC'))) { console.error('Aucune source de prix joignable : rien reconstruit. ' + JSON.stringify(report.sources)); process.exit(old.length ? 0 : 1); }
-  points = [...merged].sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price }));
+  points = [...merged].filter(([t]) => t <= today0).sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price }));
   // Toute valeur qui change entre deux relevés pour un même jour est notée : c'est ce qui montre qu'une valeur était provisoire.
   for (const p of points) if (oldMap.has(p.t) && oldMap.get(p.t) !== p.price) revisions.push({ t: p.t, from: oldMap.get(p.t), to: p.price, at: now });
   const lastOld = old.length ? old[old.length - 1].t : Infinity;
@@ -52,6 +55,8 @@ if (!offline) {
       .filter(n => n.feedlabel === 'Community Announcements').map(n => [n.date * 1000, String(n.title).slice(0, 140)]);
   } catch (e) { report.sources.steamNews = 'ÉCHEC : ' + String(e.message).split('\n')[0]; }
 }
+// Les relevés faits en jeu s'appliquent toujours, même hors ligne
+{ const m = new Map(points.map(p => [p.t, p.price])); for (const [t, p] of manual) if (t <= today0) { if (m.has(t) && m.get(t) !== p) report.ecartsEntreSources.push(`${iso(t)} : relevé public ${m.get(t)}, relevé en jeu ${p}`); m.set(t, p); } points = [...m].sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price })); }
 if (!points.length) { console.error('Aucune donnée.'); process.exit(1); }
 const changed = JSON.stringify(points) !== JSON.stringify(old) || JSON.stringify(news) !== oldNews || !state.updatedAt;
 if (changed) state.updatedAt = now;
@@ -59,9 +64,9 @@ save('gold.json', { points }); save('firstSeen.json', seen); save('news.json', n
 
 // 3. Modèle : auto-réglage sur le passé, puis simulation
 const t0 = U(cfg.liveStart), wipe = U(cfg.wipe);
-// Un prix n'est tenu pour confirmé qu'à partir de 12h UTC le jour même. Avant, les trackers affichent une valeur provisoire
+// Un prix est confirmé s'il a été relevé en jeu, ou à partir de 12h UTC le jour même. Avant, le relevé public est provisoire
 // (9, 11 et 12 octobre 2026 : la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée).
-const H = (cfg.confirmHourUTC ?? 12) * 36e5, conf = points.filter(p => now >= p.t + H), prov = points.filter(p => now < p.t + H), last = conf[conf.length - 1];
+const H = (cfg.confirmHourUTC ?? 12) * 36e5, ok = p => manual.has(p.t) || now >= p.t + H, conf = points.filter(ok), prov = points.filter(p => !ok(p)), last = conf[conf.length - 1];
 const mp = conf.filter(p => p.t >= t0 - DAY);            // période avec joueurs + la veille (pour mesurer le premier saut)
 const tuned = M.tune(mp), { S, since } = M.prep(mp);
 const WD = { fr: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };
@@ -125,7 +130,7 @@ save('modelHistory.json', hist);
 
 // 6. Page
 const data = conf.filter(p => p.t >= t0).map(p => [p.t / DAY, p.price]);
-const inject = { ...cfg, updatedAt: state.updatedAt, seen: Object.entries(seen).map(([t, s]) => [+t, s]).slice(-10), news: news.slice(0, 10), prov: prov.map(p => [p.t, p.price]), revisions: revisions.slice(-15).reverse(), fc, model: { par: tuned.par, metrics: tuned.metrics }, journal, hist: hist.slice(-8).reverse() };
+const inject = { ...cfg, updatedAt: state.updatedAt, seen: Object.entries(seen).map(([t, s]) => [+t, s]).slice(-10), news: news.slice(0, 10), prov: prov.map(p => [p.t, p.price]), manual: [...manual.keys()].filter(t => t >= t0).map(t => t / DAY), revisions: revisions.slice(-15).reverse(), fc, model: { par: tuned.par, metrics: tuned.metrics }, journal, hist: hist.slice(-8).reverse() };
 delete inject.apis;
 const src = n => fs.readFileSync(path.join(here, 'src', n), 'utf8');
 const html = src('template.html').replace('/*APP*/', () => 'const RAW=' + JSON.stringify(data) + ';\nconst CFG=' + JSON.stringify(inject).replace(/</g, '\\u003c') + ';\n' + src('content.js') + '\n' + src('app.js'));
