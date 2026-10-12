@@ -13,6 +13,7 @@ const cfg = readJson(path.join(here, 'config.json'));
 const DAY = 864e5, now = Date.now(), iso = t => new Date(t).toISOString().slice(0, 10), U = a => Date.UTC(a[0], a[1] - 1, a[2]);
 const old = readJson(D_('gold.json'), { points: [] }).points, seen = readJson(D_('firstSeen.json'), {}), state = readJson(D_('state.json'), {});
 let news = readJson(D_('news.json'), []);
+const revisions = readJson(D_('revisions.json'), []);
 const oldNews = JSON.stringify(news);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36';
@@ -21,7 +22,7 @@ const get = url => JSON.parse(execFileSync('curl', ['-sS', '--fail', '--max-time
 let points = old;
 const report = { sources: {}, ecartsEntreSources: [], reecritures: [], nouveaux: [] };
 if (!offline) {
-  // 1. Prix : fusion des sources. Certaines publient le prix du lendemain avant minuit UTC.
+  // 1. Prix : fusion des sources. Elles donnent aussi une valeur pour le jour en cours et le lendemain, provisoire.
   const merged = new Map(old.map(p => [p.t, p.price])), oldMap = new Map(merged);
   for (const [name, url] of Object.entries(cfg.apis)) {
     try {
@@ -37,6 +38,8 @@ if (!offline) {
   }
   if (Object.values(report.sources).every(s => s.startsWith('ÉCHEC'))) { console.error('Aucune source de prix joignable : rien reconstruit. ' + JSON.stringify(report.sources)); process.exit(old.length ? 0 : 1); }
   points = [...merged].sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price }));
+  // Toute valeur qui change entre deux relevés pour un même jour est notée : c'est ce qui montre qu'une valeur était provisoire.
+  for (const p of points) if (oldMap.has(p.t) && oldMap.get(p.t) !== p.price) revisions.push({ t: p.t, from: oldMap.get(p.t), to: p.price, at: now });
   const lastOld = old.length ? old[old.length - 1].t : Infinity;
   for (const p of points) if (p.t > lastOld) {
     seen[p.t] = now;
@@ -52,11 +55,14 @@ if (!offline) {
 if (!points.length) { console.error('Aucune donnée.'); process.exit(1); }
 const changed = JSON.stringify(points) !== JSON.stringify(old) || JSON.stringify(news) !== oldNews || !state.updatedAt;
 if (changed) state.updatedAt = now;
-save('gold.json', { points }); save('firstSeen.json', seen); save('news.json', news); save('state.json', state);
+save('gold.json', { points }); save('firstSeen.json', seen); save('news.json', news); save('revisions.json', revisions); save('state.json', state);
 
 // 3. Modèle : auto-réglage sur le passé, puis simulation
-const t0 = U(cfg.liveStart), wipe = U(cfg.wipe), last = points[points.length - 1];
-const mp = points.filter(p => p.t >= t0 - DAY);            // période avec joueurs + la veille (pour mesurer le premier saut)
+const t0 = U(cfg.liveStart), wipe = U(cfg.wipe);
+// Un prix n'est tenu pour confirmé qu'à partir de 12h UTC le jour même. Avant, les trackers affichent une valeur provisoire
+// (9, 11 et 12 octobre 2026 : la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée).
+const H = (cfg.confirmHourUTC ?? 12) * 36e5, conf = points.filter(p => now >= p.t + H), prov = points.filter(p => now < p.t + H), last = conf[conf.length - 1];
+const mp = conf.filter(p => p.t >= t0 - DAY);            // période avec joueurs + la veille (pour mesurer le premier saut)
 const tuned = M.tune(mp), { S, since } = M.prep(mp);
 const WD = { fr: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };
 const PH = { fr: ['1 à 3 jours après un saut', '4 à 7 jours après un saut', 'plus d’une semaine après un saut'], en: ['1–3 days after a jump', '4–7 days after a jump', 'more than a week after a jump'] };
@@ -118,21 +124,22 @@ if (!hist.length || hist[hist.length - 1].t !== last.t) hist.push({ t: last.t, p
 save('modelHistory.json', hist);
 
 // 6. Page
-const data = points.filter(p => p.t >= t0).map(p => [p.t / DAY, p.price]);
-const inject = { ...cfg, updatedAt: state.updatedAt, seen: Object.entries(seen).map(([t, s]) => [+t, s]).slice(-10), news: news.slice(0, 10), fc, model: { par: tuned.par, metrics: tuned.metrics }, journal, hist: hist.slice(-8).reverse() };
+const data = conf.filter(p => p.t >= t0).map(p => [p.t / DAY, p.price]);
+const inject = { ...cfg, updatedAt: state.updatedAt, seen: Object.entries(seen).map(([t, s]) => [+t, s]).slice(-10), news: news.slice(0, 10), prov: prov.map(p => [p.t, p.price]), revisions: revisions.slice(-15).reverse(), fc, model: { par: tuned.par, metrics: tuned.metrics }, journal, hist: hist.slice(-8).reverse() };
 delete inject.apis;
 const src = n => fs.readFileSync(path.join(here, 'src', n), 'utf8');
 const html = src('template.html').replace('/*APP*/', () => 'const RAW=' + JSON.stringify(data) + ';\nconst CFG=' + JSON.stringify(inject).replace(/</g, '\\u003c') + ';\n' + src('content.js') + '\n' + src('app.js'));
 if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== html) fs.writeFileSync(out, html);
 
 // 7. Résumé
-const today = Math.floor(now / DAY) * DAY, pc = v => Math.round(v * 100) + ' %';
+const pc = v => Math.round(v * 100) + ' %';
 console.log(JSON.stringify({
   nouvellesDonnees: changed,
   maintenantUTC: new Date(now).toISOString(),
   ...report,
-  prixDeDemainDejaConnu: last.t > today ? `${iso(last.t)} : ${last.price} (${pf(last.price / points[points.length - 2].price - 1)} vs la veille)` : 'non, pas encore publié',
-  derniers: points.slice(-4).map(p => `${iso(p.t)} ${WD.fr[new Date(p.t).getUTCDay()].slice(0, 3)} ${p.price}`),
+  dernierPrixConfirme: `${iso(last.t)} : ${last.price}`,
+  valeursProvisoires: prov.map(p => `${iso(p.t)} : ${p.price}`),
+  derniers: conf.slice(-4).map(p => `${iso(p.t)} ${WD.fr[new Date(p.t).getUTCDay()].slice(0, 3)} ${p.price}`),
   prochaineEstimation: `${iso(fc[0].t)} : ≈ ${fc[0].q[6]} (80 % entre ${fc[0].q[2]} et ${fc[0].q[10]}), hausse ${pc(fc[0].pUp)}, baisse ${pc(fc[0].pDown)}`,
   modele: { ...tuned.par, joursRejoues: tuned.metrics.n, bonSens: pc(tuned.metrics.dir), prixA10pct: pc(tuned.metrics.within10), reelDansFourchette80: pc(tuned.metrics.cover80) },
   surprisesRecentes: journal.slice(0, 3).filter(j => j.lect.surprise).map(j => iso(j.t) + ' ' + j.lect.fr),

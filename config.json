@@ -5,6 +5,7 @@
     "wargold": "https://wargold.app/api/market"
   },
   "steamAppId": 1867240,
+  "confirmHourUTC": 12,
   "liveStart": [2026, 8, 21],
   "wipe": [2026, 10, 15],
   "wipeLabel": { "fr": "Saison 2", "en": "Season 2" },

@@ -18,8 +18,8 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const last=D[N-1], FLOOR=Math.min(...D.map(x=>x.p));
 const dow=t=>new Date(t).getUTCDay();
-// Le dernier point peut être le prix de demain, publié avant minuit UTC par les données du jeu
-const TODAY=Math.floor(Date.now()/DAY)*DAY, AHEAD=last.t>TODAY;
+// D ne contient que des prix confirmés. PROV = valeurs provisoires des trackers (jour en cours avant 12h UTC, lendemain).
+const TODAY=Math.floor(Date.now()/DAY)*DAY, PROV=(CFG.prov||[]).map(([t,p])=>({t,p})), PT=PROV.find(x=>x.t===TODAY);
 
 // Textes fixes, en-têtes de tableaux, langue
 document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=STR[e.dataset.t][LI]);
@@ -49,18 +49,20 @@ const F=(CFG.fc||[]).map(f=>({...f,p:f.q[6],lo:f.q[0],hi:f.q[12],q10:f.q[2],q90:
 const P=i=>i<N?D[i]:F[i-N];
 
 const longDate={day:'numeric',month:'long',year:'numeric'};
-$('asof').textContent=L('Audit de marché · WARDOGS · ','Market audit · WARDOGS · ')+(AHEAD?L('prix connu jusqu’au ','price known up to '):L('arrêté au ','as of '))+dfmt(last.t,longDate);
-$('asof2').textContent=L('Dernière donnée reçue le ','Last data received ')+new Date(CFG.updatedAt).toLocaleString(LOC,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+$('asof').textContent=L('Audit de marché · WARDOGS · ','Market audit · WARDOGS · ')+L('dernier prix confirmé le ','last confirmed price on ')+dfmt(last.t,longDate);
+$('asof2').textContent=L('Dernier changement relevé le ','Last change recorded ')+new Date(CFG.updatedAt).toLocaleString(LOC,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 
 // KPIs
 (function(){
   const mn=D.reduce((a,b)=>b.p<a.p?b:a), mx=D.reduce((a,b)=>b.p>a.p?b:a), wipe=Math.round((WIPE-TODAY)/DAY), dm={day:'numeric',month:'long'};
-  const k=[[AHEAD?L('Prix de demain · déjà publié',"Tomorrow's price · already published"):L('Dernier prix','Latest price'),fmt(last.p),dfmt(last.t,dm)+' · '+chg(pct(last.p,D[N-2].p))+L(' vs veille',' vs previous day'),AHEAD],
-    [AHEAD?L('Estimation du jour suivant','Estimate for the day after'):L('Estimation demain',"Tomorrow's estimate"),'≈ '+fmt(F[0].p),short(F[0].q10)+' – '+short(F[0].q90)+' · '+pc(F[0].pIn)+L(' à ±10 %',' within ±10%')],
+  const k=[[L('Dernier prix confirmé','Latest confirmed price'),fmt(last.p),dfmt(last.t,dm)+' · '+chg(pct(last.p,D[N-2].p))+L(' vs veille',' vs previous day')],
+    [L('Estimation du ','Estimate for ')+dfmt(F[0].t,{day:'numeric',month:'short'}),'≈ '+fmt(F[0].p),short(F[0].q10)+' – '+short(F[0].q90)+' · '+pc(F[0].pIn)+L(' à ±10 %',' within ±10%')],
     [L('Sur 7 jours','Over 7 days'),chg(pct(last.p,D[N-8].p)),L('depuis ','from ')+fmt(D[N-8].p)],
     [L('Plus bas','Lowest'),fmt(mn.p),dfmt(mn.t,dm)],
     [L('Plus haut','Highest'),fmt(mx.p),dfmt(mx.t,dm)],
     ['Wipe '+WL,wipe>0?L('J−','D−')+wipe:L('Passé','Past'),dfmt(WIPE,{weekday:'long',day:'numeric',month:'long'})]];
+  // Valeur du jour encore provisoire : affichée à part, jamais mêlée aux prix confirmés
+  if(PT)k.splice(1,0,[L('Valeur du jour · provisoire',"Today's value · provisional"),fmt(PT.p),L('relevée à ','read at ')+new Date(CFG.updatedAt).toLocaleTimeString(LOC,{timeZone:'UTC',hour:'2-digit',minute:'2-digit'})+' UTC'+L(' · peut changer jusqu\u2019à 12h UTC',' · may change until 12:00 UTC'),true]);
   $('kpis').innerHTML=k.map(x=>`<div class="kpi${x[3]?' hot':''}"><span class="l">${x[0]}</span><span class="v num">${x[1]}</span><span class="d num">${x[2]}</span></div>`).join('');
 })();
 
@@ -117,7 +119,7 @@ function mark(){
   $('rDate').textContent=dfmt(d.t,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(isF?est:'')+(gi===pin?L(' · épinglé',' · pinned'):'');
   $('rPrice').textContent=(isF?'≈ ':'')+fmt(d.p);
   $('rPrice').classList.toggle('est',isF);
-  const tag=(EV[d.t]?`<span class="tag">${EV[d.t][1]}</span>`:'')+(gi===N-1&&AHEAD?`<span class="tag">${L('Publié à l’avance, en vigueur à minuit UTC','Published in advance, effective at midnight UTC')}</span>`:'');
+  const tag=(EV[d.t]?`<span class="tag">${EV[d.t][1]}</span>`:'');
   $('rChg').innerHTML=isF?`<span>${range80(d)}</span><span>${pc(d.pIn)}${L(' de chances d’être à ±10 %',' odds of being within ±10%')}</span><span>${chg(pct(d.p,last.p))}${L(' vs dernier prix',' vs latest price')}</span>${tag}`
     :(prev?`<span>${chg(pct(d.p,prev.p))}${vs}</span>`:'')+(gi!==N-1?`<span>${L('Dernier prix : ','Latest price: ')}${chg(pct(last.p,d.p))}${L(' par rapport à ce jour',' compared with that day')}</span>`:'')+tag;
   const cross=chart.querySelector('#cross'), li=gi-G.i0, show=hover!=null&&li>=0;
@@ -209,6 +211,13 @@ $('srcBody').innerHTML=DATASRC.map(r=>row3(r,'kw')+`<td><span class="pill ${r[2]
 $('cmpBody').innerHTML=COMPARE.map(r=>row3(r,'kw')+`<td class="p">${r[2][LI]}</td></tr>`).join('');
 $('recos').innerHTML=RECOS.map(r=>`<li><b>${r[0][LI]}</b> ${r[1][LI]}</li>`).join('');
 $('links').innerHTML=LINKS.map(l=>`<a href="${l[1]}" rel="noopener">${l[0]}</a>`).join('');
+
+// Valeurs provisoires et révisions constatées
+(function(){
+  const tm=t=>new Date(t).toLocaleString(LOC,{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  $('revBody').innerHTML=(CFG.revisions||[]).map(r=>`<tr><td class="k">${dfmt(r.t,{weekday:'short',day:'numeric',month:'short'})}</td><td class="r num">${fmt(r.from)}</td><td class="r num">${fmt(r.to)}</td><td class="r num">${chg(pct(r.to,r.from))}</td><td class="num">${tm(r.at)}</td></tr>`).join('')||`<tr><td colspan="5" class="p">${L('Aucune révision relevée.','No revision recorded.')}</td></tr>`;
+  $('provNow').textContent=PROV.length?L('Valeurs provisoires en ce moment : ','Provisional values right now: ')+PROV.map(p=>dfmt(p.t,{day:'numeric',month:'short'})+' '+fmt(p.p)).join(', ')+'.':'';
+})();
 
 // Annonces officielles Steam
 $('newsBody').innerHTML=(CFG.news||[]).map(n=>`<tr><td class="k num">${dfmt(n[0],{day:'2-digit',month:'2-digit',year:'numeric'})}</td><td>${WD[dow(n[0])]}</td><td class="p">${esc(n[1])}</td></tr>`).join('')||`<tr><td colspan="3" class="p">${L('Annonces indisponibles lors de cette mise à jour.','Announcements unavailable at this update.')}</td></tr>`;
