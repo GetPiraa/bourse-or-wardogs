@@ -5,7 +5,7 @@
   },
   "steamAppId": 1867240,
   "confirmHourUTC": 12,
-  "morningFromUTC": 5,
+  "morningFromUTC": 1,
   "liveStart": [2026, 8, 21],
   "wipe": [2026, 10, 15],
   "wipeLabel": { "fr": "Saison 2", "en": "Season 2" },

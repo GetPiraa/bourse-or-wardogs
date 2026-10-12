@@ -66,10 +66,10 @@ save('gold.json', { points }); save('firstSeen.json', seen); save('news.json', n
 
 // 3. Modèle : auto-réglage sur le passé, puis simulation
 const t0 = U(cfg.liveStart), wipe = U(cfg.wipe);
-// Un prix est confirmé dès que la valeur de la nuit est remplacée le matin même (à partir de 6h UTC), s'il a été relevé en jeu,
+// Un prix est confirmé dès que la valeur de la nuit est remplacée le jour même (à partir de 1h UTC), s'il a été relevé en jeu,
 // ou au plus tard à 12h UTC si rien n'a changé. Avant, le relevé public est provisoire
 // (9, 11 et 12 octobre 2026 : la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée).
-const H = (cfg.confirmHourUTC ?? 12) * 36e5, M0 = (cfg.morningFromUTC ?? 5) * 36e5, ok = p => manual.has(p.t) || now >= p.t + H || revisions.some(r => r.t === p.t && (r.srcAt || r.at) >= p.t + M0), conf = points.filter(ok), prov = points.filter(p => !ok(p)), last = conf[conf.length - 1];
+const H = (cfg.confirmHourUTC ?? 12) * 36e5, M0 = (cfg.morningFromUTC ?? 1) * 36e5, ok = p => manual.has(p.t) || now >= p.t + H || revisions.some(r => r.t === p.t && (r.srcAt || r.at) >= p.t + M0), conf = points.filter(ok), prov = points.filter(p => !ok(p)), last = conf[conf.length - 1];
 const mp = conf.filter(p => p.t >= t0 - DAY);            // période avec joueurs + la veille (pour mesurer le premier saut)
 const tuned = M.tune(mp), { S, since } = M.prep(mp);
 const WD = { fr: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };

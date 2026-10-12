@@ -2,11 +2,9 @@ name: Mise à jour du prix de l'or
 
 on:
   schedule:
-    # MetaForge enregistre le nouveau prix vers la minute 25 de chaque heure (09h25 UTC le 12 octobre 2026) et son relevé
-    # reste en cache 5 minutes. Le matin, de 5h à 13h UTC, un passage toutes les 5 minutes le publie dès qu'il y est.
-    # Le reste de la journée, un passage par heure juste après la minute 25 rattrape une correction.
-    - cron: '*/5 5-12 * * *'
-    - cron: '29 0-4,13-23 * * *'
+    # L'heure à laquelle le studio fixe le prix du jour n'est pas connue (entre 00h37 et 09h25 UTC le 12 octobre 2026).
+    # Un passage toutes les 5 minutes, jour et nuit, pour ne rater aucune heure. La source garde son relevé 5 minutes en cache.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
