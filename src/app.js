@@ -225,7 +225,7 @@ $('links').innerHTML=LINKS.map(l=>`<a href="${l[1]}" rel="noopener">${l[0]}</a>`
 // Valeurs provisoires et révisions constatées
 (function(){
   const tm=t=>new Date(t).toLocaleString(LOC,{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  $('revBody').innerHTML=(CFG.revisions||[]).map(r=>`<tr><td class="k">${dfmt(r.t,{weekday:'short',day:'numeric',month:'short'})}</td><td class="r num">${fmt(r.from)}</td><td class="r num">${fmt(r.to)}</td><td class="r num">${chg(pct(r.to,r.from))}</td><td class="num">${tm(r.at)}</td></tr>`).join('')||`<tr><td colspan="5" class="p">${L('Aucune révision relevée.','No revision recorded.')}</td></tr>`;
+  $('revBody').innerHTML=(CFG.revisions||[]).map(r=>`<tr><td class="k">${dfmt(r.t,{weekday:'short',day:'numeric',month:'short'})}</td><td class="r num">${fmt(r.from)}</td><td class="r num">${fmt(r.to)}</td><td class="r num">${chg(pct(r.to,r.from))}</td><td class="num">${tm(r.srcAt||r.at)}</td></tr>`).join('')||`<tr><td colspan="5" class="p">${L('Aucune révision relevée.','No revision recorded.')}</td></tr>`;
   $('provNow').textContent=PROV.length?L('Valeurs provisoires en ce moment : ','Provisional values right now: ')+PROV.map(p=>dfmt(p.t,{day:'numeric',month:'short'})+' '+fmt(p.p)).join(', ')+'.':'';
 })();
 

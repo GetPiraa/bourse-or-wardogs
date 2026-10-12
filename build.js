@@ -23,13 +23,15 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/
 const get = url => JSON.parse(execFileSync('curl', ['-sS', '--fail', '--max-time', '30', '-A', UA, url], { encoding: 'utf8' }));
 
 let points = old.filter(p => p.t <= today0);
+let srcAt = 0;
 const report = { sources: {}, ecartsEntreSources: [], reecritures: [], nouveaux: [] };
 if (!offline) {
   // 1. Prix : relevé public du jour (provisoire avant 12h UTC). Aucune valeur future n'est gardée.
   const merged = new Map(old.map(p => [p.t, p.price])), oldMap = new Map(merged);
   for (const [name, url] of Object.entries(cfg.apis)) {
     try {
-      const pts = get(url).points;
+      const j = get(url), pts = j.points;
+      if (j.updatedAt > 0) srcAt = j.updatedAt;                 // heure à laquelle la source a enregistré son dernier changement
       if (!Array.isArray(pts) || pts.some(p => !(p.t > 0 && p.price > 0))) throw new Error('format inattendu');
       report.sources[name] = `${pts.length} jours, jusqu'au ${iso(pts[pts.length - 1].t)}`;
       for (const p of pts) {
@@ -42,7 +44,7 @@ if (!offline) {
   if (Object.values(report.sources).every(s => s.startsWith('ÉCHEC'))) { console.error('Aucune source de prix joignable : rien reconstruit. ' + JSON.stringify(report.sources)); process.exit(1); }
   points = [...merged].filter(([t]) => t <= today0).sort((a, b) => a[0] - b[0]).map(([t, price]) => ({ t, price }));
   // Toute valeur qui change entre deux relevés pour un même jour est notée : c'est ce qui montre qu'une valeur était provisoire.
-  for (const p of points) if (oldMap.has(p.t) && oldMap.get(p.t) !== p.price) revisions.push({ t: p.t, from: oldMap.get(p.t), to: p.price, at: now });
+  for (const p of points) if (oldMap.has(p.t) && oldMap.get(p.t) !== p.price) revisions.push({ t: p.t, from: oldMap.get(p.t), to: p.price, at: now, ...(srcAt ? { srcAt } : {}) });
   const lastOld = old.length ? old[old.length - 1].t : Infinity;
   for (const p of points) if (p.t > lastOld) {
     seen[p.t] = now;
@@ -67,7 +69,7 @@ const t0 = U(cfg.liveStart), wipe = U(cfg.wipe);
 // Un prix est confirmé dès que la valeur de la nuit est remplacée le matin même (à partir de 6h UTC), s'il a été relevé en jeu,
 // ou au plus tard à 12h UTC si rien n'a changé. Avant, le relevé public est provisoire
 // (9, 11 et 12 octobre 2026 : la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée).
-const H = (cfg.confirmHourUTC ?? 12) * 36e5, M0 = (cfg.morningFromUTC ?? 6) * 36e5, ok = p => manual.has(p.t) || now >= p.t + H || revisions.some(r => r.t === p.t && r.at >= p.t + M0), conf = points.filter(ok), prov = points.filter(p => !ok(p)), last = conf[conf.length - 1];
+const H = (cfg.confirmHourUTC ?? 12) * 36e5, M0 = (cfg.morningFromUTC ?? 5) * 36e5, ok = p => manual.has(p.t) || now >= p.t + H || revisions.some(r => r.t === p.t && (r.srcAt || r.at) >= p.t + M0), conf = points.filter(ok), prov = points.filter(p => !ok(p)), last = conf[conf.length - 1];
 const mp = conf.filter(p => p.t >= t0 - DAY);            // période avec joueurs + la veille (pour mesurer le premier saut)
 const tuned = M.tune(mp), { S, since } = M.prep(mp);
 const WD = { fr: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };

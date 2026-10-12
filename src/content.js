@@ -5,7 +5,7 @@ const STR = {
   h1: ["Bourse de l'or", 'Gold Exchange'],
   sub: ["Suivi du taux cash contre lingot de WARDOGS depuis le 21 août 2026, premier jour avec des joueurs. Le studio décide d'un prix par jour. Les 11 et 12 octobre, ce prix a été fixé dans la matinée (heure UTC), et la valeur visible avant était provisoire. Bulkhead n'a jamais expliqué son calcul : ce qui suit est déduit des données et des fichiers du jeu.",
     'Tracking the WARDOGS cash to gold bar rate since 21 August 2026, the first day with players. The studio sets one price per day. On 11 and 12 October that price was set during the morning (UTC), and the value visible before was provisional. Bulkhead has never explained its calculation: what follows is inferred from the data and the game files.'],
-  auto: ['Relevé toutes les 10 minutes le matin, puis chaque heure', 'Checked every 10 minutes in the morning, then hourly'],
+  auto: ['Relevé toutes les 5 minutes le matin, puis chaque heure', 'Checked every 5 minutes in the morning, then hourly'],
   h_chart: ['Cours du lingot', 'Gold bar price'],
   lg_actual: ['Prix réel', 'Actual price'],
   lg_est: ['Estimation (médiane)', 'Estimate (median)'],
@@ -25,7 +25,7 @@ const STR = {
     'Recomputed at every update, excluding jump days. A rule with 4 to 7 cases is fragile: several active rules pointing the same way are worth more than one.'],
   h_fc: ['Estimations sur 15 jours', '15-day estimates'],
   h_rev: ['Valeurs provisoires et révisions', 'Provisional values and revisions'],
-  note_rev: ["Chaque ligne est une valeur qui a changé entre deux relevés pour un même jour. L'heure est celle du relevé qui a vu le changement, pas celle du changement.", 'Each row is a value that changed between two readings for the same day. The time is that of the reading that saw the change, not of the change itself.'],
+  note_rev: ["Chaque ligne est une valeur qui a changé entre deux relevés pour un même jour. L'heure est celle où la source a enregistré le changement quand elle la donne, sinon celle de notre relevé.", 'Each row is a value that changed between two readings for the same day. The time is when the source recorded the change when it gives it, otherwise that of our reading.'],
   h_jr: ['Journal des prédictions', 'Prediction log'],
   note_jr: ["Chaque jour passé est rejoué avec les seules données connues la veille. Les lignes « Prédit en direct » sont les annonces réellement enregistrées avant que le prix sorte. Une « surprise » est un prix sorti de la fourchette 80 % : c'est là que le studio a fait autre chose que d'habitude.",
     'Each past day is replayed using only the data known the day before. Rows marked "Predicted live" are forecasts actually recorded before the price came out. A "surprise" is a price outside the 80% range: that is where the studio did something unusual.'],
@@ -83,7 +83,7 @@ const FINDINGS = [
   [['Lien avec le cash en circulation', 'Link with cash in circulation'], ['Théorie de joueurs. Le krach de −77 % a commencé la veille du patch 0.1.2, pas après.', 'A player theory. The −77% crash began the day before patch 0.1.2, not after.'], 'lo', ['Non prouvé', 'Unproven']]
 ];
 const RECOS = [
-  [['Attends le prix confirmé avant de convertir.', 'Wait for the confirmed price before converting.'], ["Les 9, 11 et 12 octobre, la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée. Cette page confirme le prix dès que la valeur de la nuit est remplacée le matin, avec un relevé toutes les 10 minutes de 6h à 12h UTC (8h à 14h en France en été).", 'On 9, 11 and 12 October the value seen the evening before or during the night was replaced during the morning. This page confirms the price as soon as the overnight value is replaced in the morning, with a reading every 10 minutes from 06:00 to 12:00 UTC.']],
+  [['Attends le prix confirmé avant de convertir.', 'Wait for the confirmed price before converting.'], ["Les 9, 11 et 12 octobre, la valeur vue la veille ou pendant la nuit a été remplacée dans la matinée. Cette page confirme le prix dès que la valeur de la nuit est remplacée le matin, avec un relevé toutes les 5 minutes de 5h à 13h UTC (7h à 15h en France en été).", 'On 9, 11 and 12 October the value seen the evening before or during the night was replaced during the morning. This page confirms the price as soon as the overnight value is replaced in the morning, with a reading every 5 minutes from 05:00 to 13:00 UTC.']],
   [["Avant le wipe, convertis le cash dont tu n'as plus besoin.", 'Before the wipe, convert the cash you no longer need.'], ["Les trois lancements précédents ont multiplié le prix par 2,8 à 3,5, et le cash est effacé au wipe. Le prix du jour de lancement n'est pas connu à l'avance.", 'The three previous launches multiplied the price by 2.8 to 3.5, and cash is wiped. The launch-day price is not known in advance.']],
   [['Sous 350 000, convertis sans attendre mieux.', 'Below 350,000, convert without waiting for better.'], ["C'est le bas absolu de l'historique ; le plancher connu est 166 000.", 'That is the very bottom of the history; the known floor is 166,000.']],
   [['Samedi, tu connais dimanche.', 'On Saturday, you know Sunday.'], ['Le prix ne bouge pas le dimanche : 48 heures au même taux.', 'The price does not move on Sunday: 48 hours at the same rate.']]
